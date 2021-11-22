@@ -1,4 +1,6 @@
 
+const motionBlur = .7; //number between 0 and 1
+
 class Renderer{
     constructor(canvas){
         this.canvas = canvas;
@@ -14,7 +16,7 @@ class Renderer{
     }
 
     render(gameObjects){
-        this.ctx.fillStyle = 'rgba(255, 255, 255, .3)'
+        this.ctx.fillStyle = `rgba(255, 255, 255, ${motionBlur})`
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         for(let i in gameObjects){
             this.ctx.fillStyle = 'red';
