@@ -24,6 +24,7 @@ class Client {
         this.getWorld = this.getWorld.bind(this);
 
         this.setPlayer = this.setPlayer.bind(this);
+        this.setRoom = this.setRoom.bind(this);
         this.setWorld = this.setWorld.bind(this);
     }
 
@@ -68,6 +69,11 @@ class Client {
 
     setWorld(w){
         this.world = w;
+    }
+
+    setRoom(roomName, data){
+        this.room = roomName;
+        this.socket.emit('roomUpdate', {tileMap: data.tileMap});
     }
 
 }

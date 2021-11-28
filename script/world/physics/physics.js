@@ -10,9 +10,10 @@ const round = (number, decimalPlaces)=>{
 }
 
 class PhysicsEngine {
-    constructor(tickSpeed) {
+    constructor(tickSpeed, roomList) {
         this.entities = {};
-        this.collisionDetector = new CollisionDetector();
+        this.rooms = roomList;
+        this.collisionDetector = new CollisionDetector(this.rooms);
 
         this.tork = 5;
         this.maxV = 5;
@@ -31,7 +32,6 @@ class PhysicsEngine {
         for (let i in this.entities) {
 
             //updating acceleration
-            if (this.collisionDetector.checkCollision(this.entities[i])) {
                 let deltaA = new Vector2(0, 0); //change in acceleration
 
                 let controlled = { x: false, y: false };
@@ -109,10 +109,21 @@ class PhysicsEngine {
 
                 this.entities[i].velocity = potentialV;
 
-                this.entities[i].position = new Vector2(round(currentPos.x + (this.entities[i].velocity.x / deltaTime), DP), round(currentPos.y + (this.entities[i].velocity.y / deltaTime), DP));
+                let potentialPos = new Vector2(round(currentPos.x + (this.entities[i].velocity.x / deltaTime), DP), round(currentPos.y + (this.entities[i].velocity.y / deltaTime), DP));
 
+                let collisionResult = this.collisionDetector.solveCollision(this.entities[i], potentialPos);
 
-            }
+                this.entities[i].position = new Vector2(collisionResult.position.x, collisionResult.position.y);
+                if(collisionResult.collisionOccured.x){
+                    this.entities[i].velocity.setX(0);
+                    this.entities[i].acceleration.setX(0);
+                }
+
+                if(collisionResult.collisionOccured.y){
+                    this.entities[i].velocity.setY(0);
+                    this.entities[i].acceleration.setY(0);
+                }
+                
 
         }
 

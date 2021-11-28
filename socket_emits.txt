@@ -1,0 +1,23 @@
+LIST OF THE SOCKET EMITS FROM THE SERVER & CLIENT
+
+FROM SERVER:
+
+'clientData' --> sends the client it's ID for the session and the worldList variable, which holds objects containing info about the worlds that are or aren't availible
+
+'connectionStatus' --> updates client on whether or not their connection was successful
+'assets' --> sends client an object containing links necessary assets such as spritesheets
+
+'roomUpdate' --> whenever the player joins a new room, data about that room is sent to the client in the format {tileMap: ...}
+'worldUpdate' --> data sent about entity states on every update
+
+
+FROM CLIENT:
+
+'connection' --> establishes connection
+'disconnect' --> disconnects client
+
+'loginData' --> sends login data to server in format {username: ...}
+
+'joinWorldRequest' --> sends request to join specific world from the worldList in format {worldIndex: <number>}
+
+'inputData' --> sends the list of keys being pressed

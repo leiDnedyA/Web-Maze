@@ -3,14 +3,17 @@ const PhysicsEngine = require('./physics/physics.js');
 const Vector2 = require('./physics/vector2.js');
 
 class World {
-    constructor(name = 'Sample World', maxPlayers = 20, tickSpeed = 30, roomData) {
+    constructor(name = 'Sample World', maxPlayers = 20, tickSpeed = 30, worldData) {
         this.name = name;
         this.maxPlayers = maxPlayers;
-        this.rooms = {};
+        this.tickSpeed = tickSpeed;
         this.players = {};
         this.clients = {};
+        this.worldData = worldData;
+        this.rooms = worldData.roomList;
+        this.currentChats = [];
 
-        this.physicsEngine = new PhysicsEngine(tickSpeed);
+        this.physicsEngine = new PhysicsEngine(this.tickSpeed, this.rooms);
         // this.clientHandler --> make a class for the world to communicate with clients
 
         this.update = this.update.bind(this);
@@ -45,8 +48,13 @@ class World {
         return (Object.keys(this.players).length >= this.maxPlayers)
     }
 
-    addEntity(entity){
+    addEntity(entity, room){
         this.physicsEngine.addEntity(entity);
+        if(room){
+            this.physicsEngine.entities[entity.id].setRoom(room);
+        }else{
+            this.physicsEngine.entities[entity.id].setRoom(this.worldData.startRoom);
+        }
     }
 
     removeEntity(id){
@@ -55,10 +63,18 @@ class World {
 
     requestPlayerJoin(client) { //add a better system at some point
         if (!this.isFull()) {
+
+            let room = this.worldData.startRoom;
+
+            let roomData = this.worldData.roomList[room];
+
             this.clients[client.id] = client;
-            let player = new Player(client.id, client.username, new Vector2(parseInt(5 * Math.random()), parseInt(5 * Math.random())));
+            let player = new Player(client.id, client.username, new Vector2(roomData.startPos.x, roomData.startPos.y));
             this.players[client.id] = player;
-            this.addEntity(player);
+
+            
+            this.addEntity(player, room);
+            client.setRoom(room, this.worldData.roomList[room]);
             client.setPlayer(player);
             client.setWorld(this);
 

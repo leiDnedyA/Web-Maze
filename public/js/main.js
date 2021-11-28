@@ -28,9 +28,8 @@ const awaitJoinWorld = ()=>{ // figure out how to do async await and do it here
             startCanvas();
             charController.start();
             engine.start();
-            socket.on("worldData", (data)=>{
-                world.updateGameObjects(data);
-            })
+            
+            
 
         }
     })
@@ -49,7 +48,15 @@ loginForm.addEventListener('submit', (e) => {
         worldTableElement = generateWorldTable(data.worldList, socket, awaitJoinWorld);
         document.body.appendChild(worldTableElement);
     })
-
+    socket.on("roomUpdate", (data) => {
+        renderer.setTileMap(data.tileMap);
+    })
+    socket.on('assets', (data) => {
+        renderer.setTileSheetSRC(data.tileSheetURL);
+    })
+    socket.on("worldData", (data) => {
+        world.updateGameObjects(data);
+    })
     loginForm.style.display = 'none';
     // gameCanvas.style.display = 'block';
 })

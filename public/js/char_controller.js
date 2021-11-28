@@ -12,10 +12,7 @@ class CharController {
             ' ': false
         };
 
-
-
-        console.log('char controller started');
-        console.log(this.targetElement)
+        // console.log('char controller started');
 
         this.start = this.start.bind(this);
         this.handleKeydown = this.handleKeydown.bind(this);

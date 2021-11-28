@@ -6,21 +6,55 @@ class Renderer{
         this.canvas = canvas;
         this.ctx = this.canvas.getContext('2d');
 
+        this.tileSheet = new Image();
+        this.tileMap = null;
+
         this.canvas.width = 1000;
-        this.canvas.height = 500;
+        this.canvas.height = 1000;
 
         this.unitSize = 30;
 
         this.render = this.render.bind(this);
-    
+        this.renderTiles = this.renderTiles.bind(this);
+        this.renderGameObjects = this.renderGameObjects.bind(this);
+        this.setTileMap = this.setTileMap.bind(this);
+        this.setTileSheetSRC = this.setTileSheetSRC.bind(this);
+
     }
 
     render(gameObjects){
-        this.ctx.fillStyle = `rgba(255, 255, 255, ${motionBlur})`
+        
+        //clear the canvas
+        this.ctx.fillStyle = `rgba(0, 0, 0, ${motionBlur})`
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-        for(let i in gameObjects){
+        
+        this.renderTiles();
+        this.renderGameObjects(gameObjects);           
+    }
+
+    renderTiles(){
+        for(let i = 0; i < this.tileMap.rows; i++){
+            for (let j = 0; j < this.tileMap.cols; j++){
+                let sheetPos = this.tileMap.getTile(i, j);
+                this.ctx.drawImage(this.tileMap.tileSheet, sheetPos.x, sheetPos.y, sheetPos.height, sheetPos.width, j * this.unitSize, i * this.unitSize, this.unitSize, this.unitSize);
+
+            }
+        }
+    }
+
+    renderGameObjects(gameObjects){
+        for (let i in gameObjects) {
             this.ctx.fillStyle = 'red';
             this.ctx.fillRect(gameObjects[i].position.x * this.unitSize, gameObjects[i].position.y * this.unitSize, this.unitSize, this.unitSize);
         }
     }
+
+    setTileMap(tileMap){
+        this.tileMap = new TileMap(tileMap, this.tileSheet);
+    }
+
+    setTileSheetSRC(src){
+        this.tileSheet.src = src;
+        this.tileMap.tileSheet.src = src;
+    }  
 }
