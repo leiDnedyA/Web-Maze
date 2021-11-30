@@ -1,5 +1,6 @@
 
 const motionBlur = .7; //number between 0 and 1
+const textMargin = 3;
 
 class Renderer{
     constructor(canvas){
@@ -13,10 +14,12 @@ class Renderer{
         this.canvas.height = 1000;
 
         this.unitSize = 30;
+        this.textSize = 25;
 
         this.render = this.render.bind(this);
         this.renderTiles = this.renderTiles.bind(this);
         this.renderGameObjects = this.renderGameObjects.bind(this);
+        this.renderNametag = this.renderNametag.bind(this);
         this.setTileMap = this.setTileMap.bind(this);
         this.setTileSheetSRC = this.setTileSheetSRC.bind(this);
 
@@ -37,7 +40,6 @@ class Renderer{
             for (let j = 0; j < this.tileMap.cols; j++){
                 let sheetPos = this.tileMap.getTile(i, j);
                 this.ctx.drawImage(this.tileMap.tileSheet, sheetPos.x, sheetPos.y, sheetPos.height, sheetPos.width, j * this.unitSize, i * this.unitSize, this.unitSize, this.unitSize);
-
             }
         }
     }
@@ -46,7 +48,16 @@ class Renderer{
         for (let i in gameObjects) {
             this.ctx.fillStyle = 'red';
             this.ctx.fillRect(gameObjects[i].position.x * this.unitSize, gameObjects[i].position.y * this.unitSize, this.unitSize, this.unitSize);
+            this.renderNametag(gameObjects[i]);
         }
+    }
+
+    renderNametag(gameObject){
+        this.ctx.font = `${this.textSize}px sans`;
+        this.ctx.fillStyle = 'white';
+        let textWidth = this.ctx.measureText(gameObject.name).width;
+        console.log(textWidth)
+        this.ctx.fillText(gameObject.name, gameObject.position.x * this.unitSize - (textWidth / 2) + this.unitSize / 2, gameObject.position.y * this.unitSize - textMargin);
     }
 
     setTileMap(tileMap){
