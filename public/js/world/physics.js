@@ -6,6 +6,7 @@ class Vector2{
 
         this.setX = this.setX.bind(this);
         this.setY = this.setY.bind(this);
+        this.stringify = this.stringify.bind(this);
     }
 
     setX(x){
@@ -14,5 +15,9 @@ class Vector2{
 
     setY(y){
         this.y = y;
+    }
+
+    stringify(){
+        return `(${this.x}, ${this.y})`;
     }
 }

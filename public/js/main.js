@@ -28,9 +28,6 @@ const awaitJoinWorld = ()=>{ // figure out how to do async await and do it here
             startCanvas();
             charController.start();
             engine.start();
-            
-            
-
         }
     })
 }
@@ -47,6 +44,8 @@ loginForm.addEventListener('submit', (e) => {
     socket.on('clientData', (data) => {
         worldTableElement = generateWorldTable(data.worldList, socket, awaitJoinWorld);
         document.body.appendChild(worldTableElement);
+        renderer.setCameraTargetID(data.id);
+        console.log(`Client ID: ${data.id}`);
     })
     socket.on("roomUpdate", (data) => {
         renderer.setTileMap(data.tileMap);
