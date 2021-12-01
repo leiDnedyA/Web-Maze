@@ -25,13 +25,14 @@ class Renderer {
         this.renderTiles = this.renderTiles.bind(this);
         this.renderGameObjects = this.renderGameObjects.bind(this);
         this.renderNametag = this.renderNametag.bind(this);
+        this.renderChats = this.renderChats.bind(this);
         this.setTileMap = this.setTileMap.bind(this);
         this.setTileSheetSRC = this.setTileSheetSRC.bind(this);
         this.relativePos = this.relativePos.bind(this);
 
     }
 
-    render(gameObjects) {
+    render(gameObjects, chats) {
 
         //pre-rendering tasks
         this.adjustCamera(gameObjects);
@@ -42,31 +43,7 @@ class Renderer {
 
         this.renderTiles();
         this.renderGameObjects(gameObjects);
-    }
-
-    adjustCamera(gameObjects) {
-
-        for (let i in gameObjects) {
-            if (gameObjects[i].id == this.cameraTarget) {
-
-                //x axis
-
-                if (gameObjects[i].position.x - cameraPadding < this.cameraOffset.x) {
-                    this.cameraOffset.setX(gameObjects[i].position.x - cameraPadding)
-                } else if ((gameObjects[i].position.x + 1 + cameraPadding) > (this.cameraOffset.x + (this.canvas.width / this.unitSize))) {
-                    this.cameraOffset.setX(gameObjects[i].position.x - (this.canvas.width / this.unitSize) + 1 + cameraPadding);
-                }
-
-                //y axis
-                if (gameObjects[i].position.y - cameraPadding < this.cameraOffset.y) {
-                    this.cameraOffset.setY(gameObjects[i].position.y - cameraPadding)
-                } else if ((gameObjects[i].position.y + 1 + cameraPadding) > (this.cameraOffset.y + (this.canvas.height / this.unitSize))) {
-                    this.cameraOffset.setY(gameObjects[i].position.y - (this.canvas.height / this.unitSize) + 1 + cameraPadding);
-                }
-
-
-            }
-        }
+        this.renderChats(chats, gameObjects);
     }
 
     renderTiles() {
@@ -102,8 +79,48 @@ class Renderer {
         this.ctx.fillText(gameObject.name, parentAdjPos.x * this.unitSize - (textWidth / 2) + this.unitSize / 2, parentAdjPos.y * this.unitSize - textMargin);
     }
 
+    renderChats(chats, gameObjects){
+
+        for(let i in chats){
+            for(let j in gameObjects){
+                if(gameObjects[j].id == chats[i].senderID){
+                    let adjPos = this.relativePos(gameObjects[j].position);
+                    this.ctx.fillStyle = 'white';
+
+                    this.ctx.fillText(chats[i].message, adjPos.x * this.unitSize, (adjPos.y - 1) * this.unitSize);
+
+                }
+            }
+        }
+    }
+
     setTileMap(tileMap) {
         this.tileMap = new TileMap(tileMap, this.tileSheet);
+    }
+
+    adjustCamera(gameObjects) {
+
+        for (let i in gameObjects) {
+            if (gameObjects[i].id == this.cameraTarget) {
+
+                //x axis
+
+                if (gameObjects[i].position.x - cameraPadding < this.cameraOffset.x) {
+                    this.cameraOffset.setX(gameObjects[i].position.x - cameraPadding)
+                } else if ((gameObjects[i].position.x + 1 + cameraPadding) > (this.cameraOffset.x + (this.canvas.width / this.unitSize))) {
+                    this.cameraOffset.setX(gameObjects[i].position.x - (this.canvas.width / this.unitSize) + 1 + cameraPadding);
+                }
+
+                //y axis
+                if (gameObjects[i].position.y - cameraPadding < this.cameraOffset.y) {
+                    this.cameraOffset.setY(gameObjects[i].position.y - cameraPadding)
+                } else if ((gameObjects[i].position.y + 1 + cameraPadding) > (this.cameraOffset.y + (this.canvas.height / this.unitSize))) {
+                    this.cameraOffset.setY(gameObjects[i].position.y - (this.canvas.height / this.unitSize) + 1 + cameraPadding);
+                }
+
+
+            }
+        }
     }
 
     relativePos(pos) { //adjusts a world pos based on factors like the camera offset

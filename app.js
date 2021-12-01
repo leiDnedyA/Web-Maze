@@ -2,6 +2,7 @@ const express = require("express");
 const http = require("http");
 const Socket = require("socket.io");
 const Client = require("./script/server/client/client");
+const Chat = require("./script/chat/chat");
 require("dotenv").config()
 
 //routing stuff
@@ -15,7 +16,7 @@ const World = require("./script/world/world");
 const app = express();
 const server = http.createServer(app);
 const io = new Socket.Server(server);
-const clientList = [];
+const clientList = {};
 const worldList = [];
 const port = 3000;
 const tickSpeed = 60;
@@ -93,10 +94,14 @@ io.on('connection', (socket) => {
     console.log('a client connected');
     let client = new Client(socket);
 
+    clientList[client.id] = client;
+
     socket.on('disconnect', () => {
         if(client.player){;
             client.disconnect();
         }
+
+        delete clientList[client.id];
     })
 
     socket.on('loginData', (data) => {
@@ -105,7 +110,10 @@ io.on('connection', (socket) => {
             id: client.getId(),
             worldList: worldList.map(world => ({ name: world.name, maxPlayers: world.maxPlayers, currentPlayers: world.getCurrentPlayers(), isFull: world.isFull() }))
         })
+
         socket.on('joinWorldRequest', data => {
+
+            let clientWorld = worldList[data.worldIndex];
 
             console.log(`Client ${client.username} is requesting to join world ${worldList[data.worldIndex].name}`);
             
@@ -114,10 +122,17 @@ io.on('connection', (socket) => {
 
             socket.emit("assets", {'tileSheetURL': 'res/mario_tileset0.png'});
 
-            if(connectionAttempt){
+            if(connectionAttempt){ //all inputs and chats should go here because it requires the connection to work
                 socket.on('inputData', (data)=>{
                     client.player.charController.setInput(data);
                 })
+
+                socket.on('newChat', (data)=>{
+
+                    clientWorld.emitChat({message: data.message, clientID: client.id});
+
+                })
+
             }
 
         })

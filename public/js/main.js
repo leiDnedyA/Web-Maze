@@ -1,16 +1,18 @@
 const socket = io();
 
 const gameCanvas = document.querySelector("#gameCanvas");
-const loginForm = document.querySelector("#loginForm")
+const loginForm = document.querySelector("#loginForm");
+const chatForm = document.querySelector("#chatForm");
+const chatInput = document.querySelector("#chatInput");
 const usernameInput = document.querySelector("#usernameInput");
 const loadingText = document.createElement("h2");
 loadingText.innerHTML = "loading...";
 
 var worldTableElement = null;
 
-
 const updateFunc = (deltaTime) => {
-    renderer.render(world.getGameObjects())
+    renderer.render(world.getGameObjects(), chat.getChats())
+    chat.update();
     socket.emit('inputData', charController.getKeysDown());
 }
 
@@ -18,6 +20,7 @@ const engine = new Engine(60, updateFunc);
 const renderer = new Renderer(gameCanvas);
 const world = new World();
 const charController = new CharController();
+const chat = new Chat(socket, chatForm, chatInput);
 
 const awaitJoinWorld = ()=>{ // figure out how to do async await and do it here
     worldTableElement.style.display = 'none';
@@ -28,6 +31,7 @@ const awaitJoinWorld = ()=>{ // figure out how to do async await and do it here
             startCanvas();
             charController.start();
             engine.start();
+            chat.start();
         }
     })
 }

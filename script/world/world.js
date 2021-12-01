@@ -1,3 +1,4 @@
+const Chat = require('../chat/chat.js');
 const Player = require('./entities/player.js');
 const PhysicsEngine = require('./physics/physics.js');
 const Vector2 = require('./physics/vector2.js');
@@ -11,9 +12,9 @@ class World {
         this.clients = {};
         this.worldData = worldData;
         this.rooms = worldData.roomList;
-        this.currentChats = [];
 
         this.physicsEngine = new PhysicsEngine(this.tickSpeed, this.rooms);
+        this.chat = new Chat(this.clients);
         // this.clientHandler --> make a class for the world to communicate with clients
 
         this.update = this.update.bind(this);
@@ -21,6 +22,7 @@ class World {
         this.requestPlayerJoin = this.requestPlayerJoin.bind(this);
         this.playerDisconnect = this.playerDisconnect.bind(this);
         this.getCurrentPlayers = this.getCurrentPlayers.bind(this);
+        this.emitChat = this.emitChat.bind(this);
     }
 
     update(deltaTime) {
@@ -82,6 +84,10 @@ class World {
         }
 
         return false;
+    }
+
+    emitChat(chat){
+        this.chat.handleChat(chat);
     }
 
     playerDisconnect(id) {
