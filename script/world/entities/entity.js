@@ -12,7 +12,7 @@ class Entity extends PhysicsObject{
         this.setRoom = this.setRoom.bind(this);
     }
 
-    setRoom(newRoom){
+    setRoom(newRoom){ 
         this.room = newRoom;
     }
 }

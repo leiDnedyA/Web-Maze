@@ -2,6 +2,7 @@ const Chat = require('../chat/chat.js');
 const Player = require('./entities/player.js');
 const PhysicsEngine = require('./physics/physics.js');
 const Vector2 = require('./physics/vector2.js');
+const ActionsHandler = require('./actionsHandler.js')
 
 class World {
     constructor(name = 'Sample World', maxPlayers = 20, tickSpeed = 30, worldData) {
@@ -13,6 +14,7 @@ class World {
         this.worldData = worldData;
         this.rooms = worldData.roomList;
 
+        this.actionsHandler = new ActionsHandler(this);
         this.physicsEngine = new PhysicsEngine(this.tickSpeed, this.rooms);
         this.chat = new Chat(this.clients);
         // this.clientHandler --> make a class for the world to communicate with clients
@@ -22,6 +24,7 @@ class World {
         this.requestPlayerJoin = this.requestPlayerJoin.bind(this);
         this.playerDisconnect = this.playerDisconnect.bind(this);
         this.getCurrentPlayers = this.getCurrentPlayers.bind(this);
+        this.changeClientRoom = this.changeClientRoom.bind(this);
         this.emitChat = this.emitChat.bind(this);
     }
 
@@ -29,20 +32,32 @@ class World {
 
         //updating clients on world data
         this.physicsEngine.update(deltaTime);
+        this.actionsHandler.handleAllActions(this.clients, this.worldData);        
 
         let entityList = this.physicsEngine.getEntityList();
-
-        let worldData = Object.keys(entityList)
-            .map((a) => {
-                return entityList[a]
-            })
-            .map((entity, index) => {
-                return { id: entity.id, name: entity.name, position: { x: entity.position.x, y: entity.position.y } }
-            })
-
-        for (let i in this.clients) {
-            this.clients[i].emit("worldData", worldData);
+        
+        for(let i in this.rooms){
+            let worldData = Object.keys(entityList)
+                .map((a) => {
+                    return entityList[a]
+                })
+                .filter((a)=>{
+                    if(a.room == i){
+                        return true;
+                    }
+                    return false;
+                })
+                .map((entity, index) => {
+                    return { id: entity.id, name: entity.name, position: { x: entity.position.x, y: entity.position.y } }
+                })
+            for (let j in this.clients) {
+                if(this.clients[j].room == i){
+                    this.clients[j].emit("worldData", worldData);
+                }
+            }
         }
+
+        
 
     }
 
@@ -59,11 +74,16 @@ class World {
         }
     }
 
+    changeClientRoom(client, roomName){
+        client.setRoom(roomName, this.worldData.roomList[roomName]);
+        this.physicsEngine.entities[client.id].setRoom(roomName);
+    }
+
     removeEntity(id){
         this.physicsEngine.removeEntity(id);
     }
 
-    requestPlayerJoin(client) { //add a better system at some point
+    requestPlayerJoin(client) {
         if (!this.isFull()) {
 
             let room = this.worldData.startRoom;
