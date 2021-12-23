@@ -125,6 +125,11 @@ const sampleWorldData = {
     }
 }
 
+const sendWave = (senderID, recieverID)=>{
+    console.log(`${clientList[senderID].username} waved to ${clientList[recieverID].username}`)
+    clientList[recieverID].emit('wave', { senderID: senderID, senderName: clientList[senderID].username });
+}
+
 //world setup
 const testWorld = new World('Test World', 420, tickSpeed, sampleWorldData);
 worldList.push(testWorld);
@@ -180,6 +185,10 @@ io.on('connection', (socket) => {
             if(connectionAttempt){ //all inputs and chats should go here because it requires the connection to work
                 socket.on('inputData', (data)=>{
                     client.player.charController.setInput(data);
+                })
+
+                socket.on('wave', (data)=>{
+                    sendWave(client.id, data.targetID);
                 })
 
                 socket.on('newChat', (data)=>{

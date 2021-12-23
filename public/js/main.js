@@ -75,6 +75,8 @@ loginForm.addEventListener('submit', (e) => {
         world.updateGameObjects(data);
         canvasController.setGameObjects(world.getGameObjects());
     })
+    socket.on("wave", (data)=>{
+        console.log(`${data.senderName} waved to you!`);
+    })
     loginForm.style.display = 'none';
-    // gameCanvas.style.display = 'block';
 })
