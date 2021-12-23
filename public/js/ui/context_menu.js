@@ -23,7 +23,7 @@ class ContextMenu {
            */
 
         this.init = this.init.bind(this);
-        this.updateProperties = this.updateProperties.bind(this);
+        this.setProperties = this.setProperties.bind(this);
         this.setMenuOptions = this.setMenuOptions.bind(this);
         this.display = this.display.bind(this);
         this.hide = this.hide.bind(this);
@@ -36,13 +36,17 @@ class ContextMenu {
         this.setMenuOptions(this.menuOptions);
     }
 
-    updateProperties(properties) {
-
+    setProperties(properties) {
+        this.properties = properties;
     }
 
     setMenuOptions(menuOptions) {
 
         this.menuOptions = menuOptions;
+
+        while(this.domElement.firstChild){
+            this.domElement.removeChild(this.domElement.firstChild);
+        }
 
         for (let i in this.menuOptions) {
             let optionElement = document.createElement("a");
@@ -51,7 +55,7 @@ class ContextMenu {
             optionElement.classList.add("contextMenuOption");
             optionElement.addEventListener("click", (e) => {
                 e.preventDefault();
-                this.menuOptions[i]();
+                this.menuOptions[i](this.properties.target);
             });
             this.domElement.appendChild(optionElement);
         }
@@ -60,6 +64,9 @@ class ContextMenu {
     display(position, properties) {
         if (!this.activated) {
             this.activated = true;
+
+            this.setProperties(properties);
+
             document.body.appendChild(this.domElement);
         }
 
@@ -71,6 +78,7 @@ class ContextMenu {
         if(this.activated){
             this.activated = false;
             document.body.removeChild(this.domElement);
+            this.setProperties(null);
         }
     }
 }

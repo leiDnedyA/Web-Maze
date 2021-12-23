@@ -24,11 +24,22 @@ const charController = new CharController();
 const chat = new Chat(socket, chatForm, chatInput);
 const canvasController = new CanvasController(gameCanvas, renderer.unitSize);
 
+const contextMenuOptions = {
+    "wave": (target) => {
+        console.log(`waved to ${target.name}`)
+        socket.emit("wave", {targetID: target.id});
+    },
+    "request battle": () => {
+        
+    }
+}
+
 const awaitJoinWorld = () => { // figure out how to do async await and do it here
     worldTableElement.style.display = 'none';
     document.body.appendChild(loadingText);
     socket.on('connectionStatus', (data) => {
         if (data.successful == true) {
+            canvasController.setContextMenuOptions(contextMenuOptions);
             loadingText.style.display = 'none';
             startCanvas();
             charController.start();

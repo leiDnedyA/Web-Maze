@@ -33,7 +33,6 @@ class Chat{
 
     update(){
         for(let i in this.currentChats){
-            console.log(this.currentChats[i]);
             if(Date.now() - this.currentChats[i].timeStamp >= chatDuration * 1000){
                 this.currentChats.splice(i, 1);
             }
