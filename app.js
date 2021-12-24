@@ -126,7 +126,7 @@ const sampleWorldData = {
 }
 
 const sendWave = (senderID, recieverID)=>{
-    console.log(`${clientList[senderID].username} waved to ${clientList[recieverID].username}`)
+    // console.log(`${clientList[senderID].username} waved to ${clientList[recieverID].username}`)
     clientList[recieverID].emit('wave', { senderID: senderID, senderName: clientList[senderID].username });
 }
 

@@ -23,6 +23,7 @@ const world = new World();
 const charController = new CharController();
 const chat = new Chat(socket, chatForm, chatInput);
 const canvasController = new CanvasController(gameCanvas, renderer.unitSize);
+const battleRequestHandler = new BattleRequestHandler();
 
 const contextMenuOptions = {
     "wave": (target) => {
@@ -45,6 +46,7 @@ const awaitJoinWorld = () => { // figure out how to do async await and do it her
             charController.start();
             engine.start();
             chat.start();
+            battleRequestHandler.start();
         }
     })
 }
