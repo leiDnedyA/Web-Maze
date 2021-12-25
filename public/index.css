@@ -12,9 +12,25 @@ table{
     background-color: white;
 }
 
+.disabledContextMenuOption{
+    color: #888 !important;
+}
+.disabledContextMenuOption:hover{
+    color: #888 !important;
+    background-color: #fff !important;
+    cursor: default !important;
+}
+
 .contextMenuOption{
     display: block;
-    border: solid 1px;
+    color: black;
+    padding: 1px;
+    text-decoration: none;
+    /* border: solid 1px; */
+}
+
+.contextMenuOption:hover{
+    background-color: #ddd;
 }
 
 #gameCanvas {

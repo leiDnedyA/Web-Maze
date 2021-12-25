@@ -9,6 +9,7 @@ const loadingText = document.createElement("h2");
 loadingText.innerHTML = "loading...";
 
 var worldTableElement = null;
+var clientID = null;
 
 const updateFunc = (deltaTime) => {
     renderer.render(world.getGameObjects(), chat.getChats());
@@ -26,12 +27,38 @@ const canvasController = new CanvasController(gameCanvas, renderer.unitSize);
 const battleRequestHandler = new BattleRequestHandler();
 
 const contextMenuOptions = {
-    "wave": (target) => {
-        console.log(`waved to ${target.name}`)
-        socket.emit("wave", {targetID: target.id});
+    "wave": {
+        callback: (target) => {
+            if (target) {
+                console.log(`waved to ${target.name}`)
+                socket.emit("wave", { targetID: target.id });
+            }
+        },
+        condition: (target) => {
+            if (target == null) {
+                return false;
+            }
+
+            return true;
+        }
     },
-    "request battle": () => {
-        
+    "request battle": {
+        callback: (target) => {
+            if (target) {
+                socket.emit("battleRequest", { targetID: target.id });
+            }
+        },
+        condition: (target)=>{
+            console.log(target)
+            if (target == null) {
+                return false;
+            }
+            if (target.id == clientID) {
+                return false;
+            }
+
+            return true;
+        }
     }
 }
 
@@ -64,6 +91,7 @@ loginForm.addEventListener('submit', (e) => {
     socket.on('clientData', (data) => {
         worldTableElement = generateWorldTable(data.worldList, socket, awaitJoinWorld);
         document.body.appendChild(worldTableElement);
+        clientID = data.id;
         renderer.setCameraTargetID(data.id);
         console.log(`Client ID: ${data.id}`);
     })
@@ -77,7 +105,7 @@ loginForm.addEventListener('submit', (e) => {
         world.updateGameObjects(data);
         canvasController.setGameObjects(world.getGameObjects());
     })
-    socket.on("wave", (data)=>{
+    socket.on("wave", (data) => {
         console.log(`${data.senderName} waved to you!`);
     })
     loginForm.style.display = 'none';

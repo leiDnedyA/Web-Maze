@@ -191,6 +191,10 @@ io.on('connection', (socket) => {
                     sendWave(client.id, data.targetID);
                 })
 
+                socket.on('battleRequest', (data)=>{
+                    console.log(`${client.username} requested to battle ${clientList[data.targetID].username}`);
+                })
+
                 socket.on('newChat', (data)=>{
 
                     clientWorld.emitChat({message: data.message, clientID: client.id});
