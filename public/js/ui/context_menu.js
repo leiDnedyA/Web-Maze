@@ -107,6 +107,7 @@ class ContextMenu {
                 e.preventDefault();
                 if(!this.buttons[i].disabled){
                     this.menuOptions[i].callback(this.properties.target);
+                    this.hide();
                 }
             });
             this.buttons[i] = {};
