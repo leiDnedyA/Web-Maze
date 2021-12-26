@@ -20,6 +20,8 @@ const clientList = {};
 const worldList = [];
 const port = 3000;
 const tickSpeed = 60;
+const chatChatLimit = 240;
+const xssFilter = /<(.*)>/;
 
 const sampleWorldData = {
     startRoom: "lobby",
@@ -125,6 +127,11 @@ const sampleWorldData = {
     }
 }
 
+const sendWave = (senderID, recieverID)=>{
+    // console.log(`${clientList[senderID].username} waved to ${clientList[recieverID].username}`)
+    clientList[recieverID].emit('wave', { senderID: senderID, senderName: clientList[senderID].username });
+}
+
 //world setup
 const testWorld = new World('Test World', 420, tickSpeed, sampleWorldData);
 worldList.push(testWorld);
@@ -146,7 +153,7 @@ app.use('/res', resRoute);
 
 io.on('connection', (socket) => {
 
-    console.log('a client connected');
+    console.log('new client connected');
     let client = new Client(socket);
 
     clientList[client.id] = client;
@@ -182,10 +189,20 @@ io.on('connection', (socket) => {
                     client.player.charController.setInput(data);
                 })
 
+                socket.on('wave', (data)=>{
+                    sendWave(client.id, data.targetID);
+                })
+
+                socket.on('battleRequest', (data)=>{
+                    console.log(`${client.username} requested to battle ${clientList[data.targetID].username}`);
+                })
+
                 socket.on('newChat', (data)=>{
+                    //filters chat and then sends
 
-                    clientWorld.emitChat({message: data.message, clientID: client.id});
-
+                    if(data.message.length < chatChatLimit && !xssFilter.test(data.message)){
+                        clientWorld.emitChat({ message: data.message, clientID: client.id, clientName: client.username });
+                    }
                 })
 
             }

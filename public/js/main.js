@@ -1,43 +1,107 @@
 const socket = io();
 
+//references to DOM elements
 const gameCanvas = document.querySelector("#gameCanvas");
 const loginForm = document.querySelector("#loginForm");
 const chatForm = document.querySelector("#chatForm");
 const chatInput = document.querySelector("#chatInput");
+const chatBoxDiv = document.querySelector('#chatBox');
 const usernameInput = document.querySelector("#usernameInput");
 const loadingText = document.createElement("h2");
 loadingText.innerHTML = "loading...";
 
 var worldTableElement = null;
+var clientID = null;
 
 const updateFunc = (deltaTime) => {
-    renderer.render(world.getGameObjects(), chat.getChats())
+    renderer.render(world.getGameObjects(), chat.getChats());
     chat.update();
     socket.emit('inputData', charController.getKeysDown());
+    canvasController.setCameraOffset(renderer.cameraOffset);
 }
 
+//model related stuff
 const engine = new Engine(60, updateFunc);
 const renderer = new Renderer(gameCanvas);
 const world = new World();
 const charController = new CharController();
-const chat = new Chat(socket, chatForm, chatInput);
 
-const awaitJoinWorld = ()=>{ // figure out how to do async await and do it here
+//view controllers
+const canvasController = new CanvasController(gameCanvas, renderer.unitSize);
+const battleRequestHandler = new BattleRequestHandler();
+const chatBox = new ChatBox(chatBoxDiv);
+const chat = new Chat(socket, chatBox, chatForm, chatInput);
+
+const contextMenuOptions = {
+    "wave": {
+        callback: (target) => {
+            if (target) {
+                console.log(`waved to ${target.name}`)
+                socket.emit("wave", { targetID: target.id });
+            }
+        },
+        condition: (target) => {
+            if (target == null) {
+                return false;
+            }
+
+            return true;
+        }
+    },
+    "request battle": {
+        callback: (target) => {
+            if (target) {
+                socket.emit("battleRequest", { targetID: target.id });
+                chatBox.newOutgoingBattleRequest({name: target.name});
+            }
+        },
+        condition: (target)=>{
+            // console.log(target)
+            // if (target == null) {
+            //     return false;
+            // }
+            // if (target.id == clientID) {
+            //     return false;
+            // }
+
+            // return true;
+            return false;
+        }
+    }
+}
+
+const startGame = ()=>{
+
+    /* 
+    should be called once a successful connection is established,
+    initializes a bunch of stuff
+    */
+
+    canvasController.setContextMenuOptions(contextMenuOptions);
+    loadingText.style.display = 'none';
+    startCanvas();
+    charController.start();
+    engine.start();
+    chat.start();
+    chatBox.start();
+    battleRequestHandler.start();
+}
+
+const awaitJoinWorld = () => { // figure out how to do async await and do it here
     worldTableElement.style.display = 'none';
     document.body.appendChild(loadingText);
-    socket.on('connectionStatus', (data)=>{
-        if(data.successful == true){
-            loadingText.style.display = 'none';
-            startCanvas();
-            charController.start();
-            engine.start();
-            chat.start();
+    socket.on('connectionStatus', (data) => {
+        if (data.successful == true) {
+
+            startGame();
+            
         }
     })
 }
 
-const startCanvas = ()=>{
+const startCanvas = () => {
     gameCanvas.style.display = 'inline-block';
+    canvasController.start();
 }
 
 loginForm.addEventListener('submit', (e) => {
@@ -48,6 +112,7 @@ loginForm.addEventListener('submit', (e) => {
     socket.on('clientData', (data) => {
         worldTableElement = generateWorldTable(data.worldList, socket, awaitJoinWorld);
         document.body.appendChild(worldTableElement);
+        clientID = data.id;
         renderer.setCameraTargetID(data.id);
         console.log(`Client ID: ${data.id}`);
     })
@@ -59,7 +124,11 @@ loginForm.addEventListener('submit', (e) => {
     })
     socket.on("worldData", (data) => {
         world.updateGameObjects(data);
+        canvasController.setGameObjects(world.getGameObjects());
+    })
+    socket.on("wave", (data) => {
+        console.log(`${data.senderName} waved to you!`);
+        chatBox.newWave(data);
     })
     loginForm.style.display = 'none';
-    // gameCanvas.style.display = 'block';
 })

@@ -1,9 +1,15 @@
 
 const chatDuration = 5; //duration in seconds
 
+/*
+Controls chat sending and recieving functionality
+*/
+
 class Chat{
-    constructor(socket, chatForm, chatInput){
+    constructor(socket, chatBox, chatForm, chatInput){
         this.socket = socket;
+
+        this.chatBox = chatBox; //chatBox object, not element;
 
         this.chatForm = chatForm;
         this.chatInput = chatInput;
@@ -27,13 +33,16 @@ class Chat{
         })
 
         this.socket.on('newChat', (data)=>{
+
+            /* 'data' object should contain 'clientID', 'message', and 'clientName' */
+
             this.newChat(data.message, data.clientID);
+            this.chatBox.newChat(data);
         })
     }
 
     update(){
         for(let i in this.currentChats){
-            console.log(this.currentChats[i]);
             if(Date.now() - this.currentChats[i].timeStamp >= chatDuration * 1000){
                 this.currentChats.splice(i, 1);
             }

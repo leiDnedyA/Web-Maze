@@ -7,7 +7,65 @@ table{
     border-collapse: collapse;
 }
 
+.contextMenu{
+    position: fixed;
+    background-color: white;
+}
+
+.disabledContextMenuOption{
+    color: #888 !important;
+}
+.disabledContextMenuOption:hover{
+    color: #888 !important;
+    background-color: #fff !important;
+    cursor: default !important;
+}
+
+.contextMenuOption{
+    display: block;
+    color: black;
+    padding: 1px;
+    text-decoration: none;
+    /* border: solid 1px; */
+}
+
+.contextMenuOption:hover{
+    background-color: #ddd;
+}
+
+.chatBoxContents{
+    margin: 3px;
+    padding: 0;
+    color: #444;
+}
+
+#chatForm{
+    margin: 10px 0 0 0;
+}
+
+#chatBox{
+    /* display is set to none by default because
+     the element should not be visible on the main page */
+    border: 1px solid #444;
+    display: none;
+    margin-top: 5px;
+    width: 40%;
+    height: 15%;
+    overflow-y: scroll;
+}
+
 #gameCanvas {
     border: 1px solid black;
+    display: none;
+}
+
+#battleRequestNotification {
+    border: 1px solid black;
+    padding: 5px;
+    text-align: center;
+    left: 40%;
+    top: 50%;
+    background-color: white;
+    position: fixed;
     display: none;
 }
