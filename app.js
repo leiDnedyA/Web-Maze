@@ -20,6 +20,8 @@ const clientList = {};
 const worldList = [];
 const port = 3000;
 const tickSpeed = 60;
+const chatChatLimit = 240;
+const xssFilter = /<(.*)>/;
 
 const sampleWorldData = {
     startRoom: "lobby",
@@ -151,7 +153,7 @@ app.use('/res', resRoute);
 
 io.on('connection', (socket) => {
 
-    console.log('a client connected');
+    console.log('new client connected');
     let client = new Client(socket);
 
     clientList[client.id] = client;
@@ -196,9 +198,11 @@ io.on('connection', (socket) => {
                 })
 
                 socket.on('newChat', (data)=>{
+                    //filters chat and then sends
 
-                    clientWorld.emitChat({message: data.message, clientID: client.id});
-
+                    if(data.message.length < chatChatLimit && !xssFilter.test(data.message)){
+                        clientWorld.emitChat({ message: data.message, clientID: client.id, clientName: client.username });
+                    }
                 })
 
             }

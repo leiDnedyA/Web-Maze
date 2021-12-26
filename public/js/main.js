@@ -1,9 +1,11 @@
 const socket = io();
 
+//references to DOM elements
 const gameCanvas = document.querySelector("#gameCanvas");
 const loginForm = document.querySelector("#loginForm");
 const chatForm = document.querySelector("#chatForm");
 const chatInput = document.querySelector("#chatInput");
+const chatBoxDiv = document.querySelector('#chatBox');
 const usernameInput = document.querySelector("#usernameInput");
 const loadingText = document.createElement("h2");
 loadingText.innerHTML = "loading...";
@@ -18,13 +20,17 @@ const updateFunc = (deltaTime) => {
     canvasController.setCameraOffset(renderer.cameraOffset);
 }
 
+//model related stuff
 const engine = new Engine(60, updateFunc);
 const renderer = new Renderer(gameCanvas);
 const world = new World();
 const charController = new CharController();
-const chat = new Chat(socket, chatForm, chatInput);
+
+//view controllers
 const canvasController = new CanvasController(gameCanvas, renderer.unitSize);
 const battleRequestHandler = new BattleRequestHandler();
+const chatBox = new ChatBox(chatBoxDiv);
+const chat = new Chat(socket, chatBox, chatForm, chatInput);
 
 const contextMenuOptions = {
     "wave": {
@@ -46,6 +52,7 @@ const contextMenuOptions = {
         callback: (target) => {
             if (target) {
                 socket.emit("battleRequest", { targetID: target.id });
+                chatBox.newOutgoingBattleRequest({name: target.name});
             }
         },
         condition: (target)=>{
@@ -62,18 +69,31 @@ const contextMenuOptions = {
     }
 }
 
+const startGame = ()=>{
+
+    /* 
+    should be called once a successful connection is established,
+    initializes a bunch of stuff
+    */
+
+    canvasController.setContextMenuOptions(contextMenuOptions);
+    loadingText.style.display = 'none';
+    startCanvas();
+    charController.start();
+    engine.start();
+    chat.start();
+    chatBox.start();
+    battleRequestHandler.start();
+}
+
 const awaitJoinWorld = () => { // figure out how to do async await and do it here
     worldTableElement.style.display = 'none';
     document.body.appendChild(loadingText);
     socket.on('connectionStatus', (data) => {
         if (data.successful == true) {
-            canvasController.setContextMenuOptions(contextMenuOptions);
-            loadingText.style.display = 'none';
-            startCanvas();
-            charController.start();
-            engine.start();
-            chat.start();
-            battleRequestHandler.start();
+
+            startGame();
+            
         }
     })
 }
@@ -107,6 +127,7 @@ loginForm.addEventListener('submit', (e) => {
     })
     socket.on("wave", (data) => {
         console.log(`${data.senderName} waved to you!`);
+        chatBox.newWave(data);
     })
     loginForm.style.display = 'none';
 })

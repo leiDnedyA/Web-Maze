@@ -21,7 +21,7 @@ class Chat{
 
     distributeChat(chat){
         for(let i in this.clientList){
-            this.clientList[i].socket.emit('newChat', {message: chat.message, clientID: chat.clientID});
+            this.clientList[i].socket.emit('newChat', {message: chat.message, clientID: chat.clientID, clientName: chat.clientName});
         }
     }
 
