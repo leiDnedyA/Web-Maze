@@ -194,7 +194,12 @@ io.on('connection', (socket) => {
                 })
 
                 socket.on('battleRequest', (data)=>{
-                    console.log(`${client.username} requested to battle ${clientList[data.targetID].username}`);
+                    // console.log(`${client.username} requested to battle ${clientList[data.targetID].username}`);
+                    try{
+                        clientWorld.newBattleRequest(client.id, data.targetID);
+                    }catch(e){
+                        console.log(`ERROR: ${e}`);
+                    }
                 })
 
                 socket.on('newChat', (data)=>{

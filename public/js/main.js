@@ -52,7 +52,6 @@ const contextMenuOptions = {
         callback: (target) => {
             if (target) {
                 socket.emit("battleRequest", { targetID: target.id });
-                chatBox.newOutgoingBattleRequest({name: target.name});
             }
         },
         condition: (target)=>{
@@ -128,6 +127,17 @@ loginForm.addEventListener('submit', (e) => {
     socket.on("wave", (data) => {
         console.log(`${data.senderName} waved to you!`);
         chatBox.newWave(data);
+    })
+    socket.on("sentBattleRequest", (data)=>{
+        let reciever = world.getGameObjectByID(data.recieverID);
+        chatBox.newSentBattleRequest(reciever, data.gamemode);
+        console.log(`Battle request successfully sent to ${reciever.name}.`);
+    })
+    socket.on("recievedBattleRequest", (data)=>{
+        let sender = world.getGameObjectByID(data.senderID);
+        chatBox.newRecievedBattleRequest(sender, data.gamemode);
+        console.log(`Battle request recieved from ${sender.name}`);
+        battleRequestHandler.newRequest(sender, data.gamemode);
     })
     loginForm.style.display = 'none';
 })

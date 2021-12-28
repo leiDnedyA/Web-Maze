@@ -63,9 +63,14 @@ table{
     border: 1px solid black;
     padding: 5px;
     text-align: center;
+    white-space:pre-wrap;
     left: 40%;
     top: 50%;
     background-color: white;
     position: fixed;
     display: none;
+}
+
+#battleRequestNotificationButtons {
+    margin: 5px;
 }

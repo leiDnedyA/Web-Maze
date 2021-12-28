@@ -3,6 +3,7 @@ const Player = require('./entities/player.js');
 const PhysicsEngine = require('./physics/physics.js');
 const Vector2 = require('./physics/vector2.js');
 const ActionsHandler = require('./actionsHandler.js')
+const BattleRequestHandler = require('./battles/battle_request_handler.js');
 
 class World {
     constructor(name = 'Sample World', maxPlayers = 20, tickSpeed = 30, worldData) {
@@ -17,10 +18,12 @@ class World {
         this.actionsHandler = new ActionsHandler(this);
         this.physicsEngine = new PhysicsEngine(this.tickSpeed, this.rooms);
         this.chat = new Chat(this.clients);
+        this.battleRequestHandler = new BattleRequestHandler();
         // this.clientHandler --> make a class for the world to communicate with clients
 
         this.update = this.update.bind(this);
         this.isFull = this.isFull.bind(this);
+        this.newBattleRequest = this.newBattleRequest.bind(this);
         this.requestPlayerJoin = this.requestPlayerJoin.bind(this);
         this.playerDisconnect = this.playerDisconnect.bind(this);
         this.getCurrentPlayers = this.getCurrentPlayers.bind(this);
@@ -33,6 +36,7 @@ class World {
         //updating clients on world data
         this.physicsEngine.update(deltaTime);
         this.actionsHandler.handleAllActions(this.clients, this.worldData);        
+        this.battleRequestHandler.update();
 
         let entityList = this.physicsEngine.getEntityList();
         
@@ -72,6 +76,17 @@ class World {
         }else{
             this.physicsEngine.entities[entity.id].setRoom(this.worldData.startRoom);
         }
+    }
+
+    newBattleRequest(senderID, recieverID){
+        //takes Client ID for sender and reciever
+        if (!this.clients.hasOwnProperty(senderID)){
+            throw('A client with the id senderID does not exist in this world!')
+        }
+        if(!this.clients.hasOwnProperty(recieverID)){  
+            throw ('A client with the id recieverID does not exist in this world!')
+        }
+        this.battleRequestHandler.newBattleRequest(this.clients[senderID], this.clients[recieverID]);
     }
 
     changeClientRoom(client, roomName){

@@ -11,7 +11,7 @@ class BattleRequestHandler{
         this.isVisible;
 
         this.start = this.start.bind(this);
-        this.handleBattleRequest = this.handleBattleRequest.bind(this);
+        this.newRequest = this.newRequest.bind(this);
         this.show = this.show.bind(this);
         this.hide = this.hide.bind(this);
 
@@ -39,13 +39,14 @@ class BattleRequestHandler{
 
     }
 
-    handleBattleRequest(data){
+    newRequest(sender, gamemode){
+        this.domElements.text.innerHTML = `Incoming battle request from ${sender.name}!\nGamemode: <em>${gamemode}</em>`;
         this.show();
     }
 
     show(){
         this.isVisible = true;
-        this.domElements.main.style.display = 'block';
+        this.domElements.main.style.display = 'inline-block';
     }
 
     hide(){
