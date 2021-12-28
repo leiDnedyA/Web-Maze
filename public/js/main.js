@@ -56,16 +56,15 @@ const contextMenuOptions = {
             }
         },
         condition: (target)=>{
-            // console.log(target)
-            // if (target == null) {
-            //     return false;
-            // }
-            // if (target.id == clientID) {
-            //     return false;
-            // }
+            console.log(target)
+            if (target == null) {
+                return false;
+            }
+            if (target.id == clientID) {
+                return false;
+            }
 
-            // return true;
-            return false;
+            return true;
         }
     }
 }
