@@ -74,8 +74,12 @@ class ChatBox{
         this.addMessage(`[${this.getPlayerNameHTML(data.clientName)}]: ${data.message}`);
     }
 
-    newWave(data){
-        this.addMessage(`${this.getPlayerNameHTML(data.senderName)} waved to you!`);
+    newWave(data, wavedToSelf){
+        if (wavedToSelf){
+            this.addMessage(`You waved to yourself!`);
+        }else{
+            this.addMessage(`${this.getPlayerNameHTML(data.senderName)} waved to you!`);
+        }
     }
     
     getPlayerNameHTML(playerName){

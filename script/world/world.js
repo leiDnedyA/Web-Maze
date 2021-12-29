@@ -18,7 +18,7 @@ class World {
         this.actionsHandler = new ActionsHandler(this);
         this.physicsEngine = new PhysicsEngine(this.tickSpeed, this.rooms);
         this.chat = new Chat(this.clients);
-        this.battleRequestHandler = new BattleRequestHandler();
+        this.battleRequestHandler = new BattleRequestHandler(this.newBattle);
         // this.clientHandler --> make a class for the world to communicate with clients
 
         this.update = this.update.bind(this);
@@ -29,6 +29,7 @@ class World {
         this.getCurrentPlayers = this.getCurrentPlayers.bind(this);
         this.changeClientRoom = this.changeClientRoom.bind(this);
         this.emitChat = this.emitChat.bind(this);
+        this.newBattle = this.newBattle.bind(this);
     }
 
     update(deltaTime) {
@@ -87,6 +88,10 @@ class World {
             throw ('A client with the id recieverID does not exist in this world!')
         }
         this.battleRequestHandler.newBattleRequest(this.clients[senderID], this.clients[recieverID]);
+    }
+
+    newBattle(participants, gamemode){
+        console.log(`NEW BATTLE between ${participants[0].username} and ${participants[1].username}`);
     }
 
     changeClientRoom(client, roomName){

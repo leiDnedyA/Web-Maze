@@ -28,7 +28,7 @@ const charController = new CharController();
 
 //view controllers
 const canvasController = new CanvasController(gameCanvas, renderer.unitSize);
-const battleRequestHandler = new BattleRequestHandler();
+const battleRequestHandler = new BattleRequestHandler(socket);
 const chatBox = new ChatBox(chatBoxDiv);
 const chat = new Chat(socket, chatBox, chatForm, chatInput);
 
@@ -125,8 +125,13 @@ loginForm.addEventListener('submit', (e) => {
         canvasController.setGameObjects(world.getGameObjects());
     })
     socket.on("wave", (data) => {
-        console.log(`${data.senderName} waved to you!`);
-        chatBox.newWave(data);
+        if(data.senderID == clientID){
+            console.log(`You waved to yourself!`);
+            chatBox.newWave(data, true);
+        }else{
+            console.log(`${data.senderName} waved to you!`);
+            chatBox.newWave(data, false);
+        }
     })
     socket.on("sentBattleRequest", (data)=>{
         let reciever = world.getGameObjectByID(data.recieverID);
@@ -137,7 +142,7 @@ loginForm.addEventListener('submit', (e) => {
         let sender = world.getGameObjectByID(data.senderID);
         chatBox.newRecievedBattleRequest(sender, data.gamemode);
         console.log(`Battle request recieved from ${sender.name}`);
-        battleRequestHandler.newRequest(sender, data.gamemode);
+        battleRequestHandler.newRequest(data.requestID, sender, data.gamemode);
     })
     loginForm.style.display = 'none';
 })
