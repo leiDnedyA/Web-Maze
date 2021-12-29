@@ -2,7 +2,9 @@
 class CharController {
     constructor() {
 
-        this.targetElement = window;
+        this.gameCanvas = document.querySelector("#gameCanvas");
+
+        this.canvasSelected = true;
 
         this.keysDown = {
             'w': false,
@@ -12,8 +14,6 @@ class CharController {
             ' ': false
         };
 
-        // console.log('char controller started');
-
         this.start = this.start.bind(this);
         this.handleKeydown = this.handleKeydown.bind(this);
         this.handleKeyup = this.handleKeyup.bind(this);
@@ -22,22 +22,32 @@ class CharController {
     }
 
     start() {
-        this.targetElement.addEventListener('keydown', this.handleKeydown);
-        this.targetElement.addEventListener('keyup', this.handleKeyup)
+
+        window.addEventListener('click', (e)=>{
+            //checks if player has gameCanvas selected
+            this.canvasSelected = (this.gameCanvas == e.target);
+        })
+
+        window.addEventListener('keydown', this.handleKeydown);
+        window.addEventListener('keyup', this.handleKeyup)
     }
 
     handleKeydown(e) {
-        let key = e.key.toLowerCase();
-        if(this.keysDown.hasOwnProperty(key) && !this.keysDown[key]){
-            this.keysDown[key] = true;
+        if(this.canvasSelected){
+            let key = e.key.toLowerCase();
+            if (this.keysDown.hasOwnProperty(key) && !this.keysDown[key]) {
+                this.keysDown[key] = true;
+            }
         }
 
     }
 
     handleKeyup(e) {
-        let key = e.key.toLowerCase();
-        if(this.keysDown.hasOwnProperty(key) && this.keysDown[key]){
-            this.keysDown[key] = false;
+        if(this.canvasSelected){
+            let key = e.key.toLowerCase();
+            if (this.keysDown.hasOwnProperty(key) && this.keysDown[key]) {
+                this.keysDown[key] = false;
+            }
         }
     }
 

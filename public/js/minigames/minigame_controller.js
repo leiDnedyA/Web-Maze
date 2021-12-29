@@ -10,12 +10,19 @@ update(deltaTime) --> called on every tick and given deltaTime in milliseconds
 */
 
 class MinigameController{
-    constructor(socket, clientID){
+    constructor(socket, chatBox){
         this.canvas = document.createElement('canvas');
         this.canvas.classList.add('minigameCanvas');
 
+        this.overlay = document.createElement('div');
+        this.overlay.classList.add('overlay');
+
+        this.overlay.appendChild(this.canvas);
+
+        this.chatBox = chatBox;
+
         this.socket = socket;
-        this.clientID = clientID;
+        this.clientID;
     
         this.active = false;
 
@@ -37,9 +44,27 @@ class MinigameController{
         this.hideCanvas = this.hideCanvas.bind(this);
 
     }
+    
+    /**
+    * Documentation
+    * @param {number} clientID ID of client
+    */
+    init(clientID){
 
-    init(){
-        
+        this.clientID = clientID;
+
+        document.body.appendChild(this.overlay);
+
+        this.socket.on("minigameInit", (data)=>{
+            if(this.currentMinigameInstance == null){
+                this.socket.emit("minigameConfirm", {ready: true});
+
+                this.startMinigame(data.instanceID, data.gamemode, data.participants);
+
+            }else{
+                this.socket.emit("minigameConfirm", {ready: false, message: "Client already playing minigame!"});
+            }
+        })
     }
 
     update(deltaTime){
@@ -48,16 +73,12 @@ class MinigameController{
         }
     }
 
-    startMinigame(instanceID, gamemode){
+    startMinigame(instanceID, gamemode, participants){
 
         //should check with server to make sure the minigame instance is actually running
 
         if(this.newMinigameInstance.hasOwnProperty(gamemode)){
-            this.socket.emit("initMinigame", {instanceID: instanceID, gamemode: gamemode});
-            this.socket.once("initMinigame", (data)=>{
-                this.currentMinigameInstance = this.newMinigameInstance[gamemode](instanceID);
-                this.startSession();
-            });
+            this.startSession();
         }else{
             this.endSession();
             console.log("WARNING: method startMinigame was passed in a gamemode that doesn't exist!");
@@ -76,11 +97,11 @@ class MinigameController{
     }
 
     showCanvas(){
-        this.canvas.style.display = "block";
+        this.overlay.style.visibility = "visible";
     }
 
     hideCanvas(){
-        this.canvas.style.display = "none";
+        this.overlay.style.visibility = "hidden";
     }
 
 }

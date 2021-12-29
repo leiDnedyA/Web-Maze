@@ -4,6 +4,7 @@ const PhysicsEngine = require('./physics/physics.js');
 const Vector2 = require('./physics/vector2.js');
 const ActionsHandler = require('./actionsHandler.js')
 const BattleRequestHandler = require('./battles/battle_request_handler.js');
+const MinigameHandler = require('./battles/minigames/minigame_handler.js');
 
 class World {
     constructor(name = 'Sample World', maxPlayers = 20, tickSpeed = 30, worldData) {
@@ -18,8 +19,10 @@ class World {
         this.actionsHandler = new ActionsHandler(this);
         this.physicsEngine = new PhysicsEngine(this.tickSpeed, this.rooms);
         this.chat = new Chat(this.clients);
-        this.battleRequestHandler = new BattleRequestHandler(this.newBattle);
-        // this.clientHandler --> make a class for the world to communicate with clients
+        this.battleRequestHandler = new BattleRequestHandler((participants, gamemode)=>{
+            this.newMinigame(participants, gamemode);
+        });
+        this.minigameHandler = new MinigameHandler();
 
         this.update = this.update.bind(this);
         this.isFull = this.isFull.bind(this);
@@ -29,7 +32,7 @@ class World {
         this.getCurrentPlayers = this.getCurrentPlayers.bind(this);
         this.changeClientRoom = this.changeClientRoom.bind(this);
         this.emitChat = this.emitChat.bind(this);
-        this.newBattle = this.newBattle.bind(this);
+        this.newMinigame = this.newMinigame.bind(this);
     }
 
     update(deltaTime) {
@@ -38,6 +41,7 @@ class World {
         this.physicsEngine.update(deltaTime);
         this.actionsHandler.handleAllActions(this.clients, this.worldData);        
         this.battleRequestHandler.update();
+        this.minigameHandler.update(deltaTime);
 
         let entityList = this.physicsEngine.getEntityList();
         
@@ -90,8 +94,8 @@ class World {
         this.battleRequestHandler.newBattleRequest(this.clients[senderID], this.clients[recieverID]);
     }
 
-    newBattle(participants, gamemode){
-        console.log(`NEW BATTLE between ${participants[0].username} and ${participants[1].username}`);
+    newMinigame(participants, gamemode){
+        this.minigameHandler.newMinigame(participants, "pong"); //eventually change 'pong' to show the gamemode requested by the players
     }
 
     changeClientRoom(client, roomName){

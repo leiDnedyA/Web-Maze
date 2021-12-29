@@ -31,6 +31,7 @@ const canvasController = new CanvasController(gameCanvas, renderer.unitSize);
 const battleRequestHandler = new BattleRequestHandler(socket);
 const chatBox = new ChatBox(chatBoxDiv);
 const chat = new Chat(socket, chatBox, chatForm, chatInput);
+const minigameController = new MinigameController(socket, chatBox);
 
 const contextMenuOptions = {
     "wave": {
@@ -55,7 +56,6 @@ const contextMenuOptions = {
             }
         },
         condition: (target)=>{
-            console.log(target)
             if (target == null) {
                 return false;
             }
@@ -111,8 +111,9 @@ loginForm.addEventListener('submit', (e) => {
         worldTableElement = generateWorldTable(data.worldList, socket, awaitJoinWorld);
         document.body.appendChild(worldTableElement);
         clientID = data.id;
-        renderer.setCameraTargetID(data.id);
-        console.log(`Client ID: ${data.id}`);
+        renderer.setCameraTargetID(clientID);
+        console.log(`Client ID: ${clientID}`);
+        minigameController.init(clientID);
     })
     socket.on("roomUpdate", (data) => {
         renderer.setTileMap(data.tileMap);

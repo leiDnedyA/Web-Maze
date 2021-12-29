@@ -39,6 +39,23 @@ table{
     color: #444;
 }
 
+.overlay {
+    /* Used to put a transparent layer of color over screen */
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, .7);
+    visibility: hidden;
+}
+
+.minigameCloseButton {
+    position: fixed;
+    top: 5%;
+    right: 5%;
+}
+
 .minigameCanvas {
     border: 1px solid black;
     position: absolute;

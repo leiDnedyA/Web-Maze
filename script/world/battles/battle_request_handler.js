@@ -21,7 +21,7 @@ class BattleRequestHandler{
         this.newBattleRequest = this.newBattleRequest.bind(this);
         this.declineRequest = this.declineRequest.bind(this);
         this.acceptRequest = this.acceptRequest.bind(this);
-
+        this.deleteRequest = this.deleteRequest.bind(this);
     }
 
     update(){
@@ -29,8 +29,7 @@ class BattleRequestHandler{
         //filters requests and declines those that have gone over the timeOut period
         for(let i in this.liveRequests){
             if(Date.now() - this.liveRequests[i].initTime > this.requestTimeOut * 1000){
-                this.declineRequest(this.liveRequests[i].sender, 'Request timeout');
-                this.liveRequests[i].sender.socket.removeAllListeners("battleRequestResponse");
+                this.declineRequest(this.liveRequests[i], this.liveRequests[i].sender, 'Request timeout');
             }
         }
     }
@@ -53,12 +52,9 @@ class BattleRequestHandler{
     }
 
     declineRequest(request, sender, message){
-        if(this.liveRequests.hasOwnProperty(request.id)){
-            delete this.liveRequests[request.id];
-        }else{
-            console.log("somethings has gone very wrong with battle request handler...");
-        }
         sender.socket.emit("battleRequestResponse", {accepted: false, declineMessage: message})
+
+        this.deleteRequest(request);
     }
 
     acceptRequest(request, sender, reciever){
@@ -68,12 +64,21 @@ class BattleRequestHandler{
 
         this.acceptRequestCallback([sender, reciever], request.gamemode);
 
+        this.deleteRequest(request);
+
+    }
+
+    deleteRequest(request){
+        //takes actual request instance, not ID
+
+        request.reciever.socket.removeAllListeners("battleRequestResponse");
+
         if (this.liveRequests.hasOwnProperty(request.id)) {
             delete this.liveRequests[request.id];
         } else {
+            console.log(this.liveRequests);
             console.log("somethings has gone very wrong with battle request handler...");
         }
-
     }
 
 }
