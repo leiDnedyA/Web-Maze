@@ -18,6 +18,7 @@ const updateFunc = (deltaTime) => {
     chat.update();
     socket.emit('inputData', charController.getKeysDown());
     canvasController.setCameraOffset(renderer.cameraOffset);
+    minigameController.update(deltaTime);
 }
 
 //model related stuff

@@ -95,7 +95,7 @@ class World {
     }
 
     newMinigame(participants, gamemode){
-        this.minigameHandler.newMinigame(participants, "pong"); //eventually change 'pong' to show the gamemode requested by the players
+        this.minigameHandler.newMinigame(participants, "drawing"); //eventually change 'drawing' to show the gamemode requested by the players
     }
 
     changeClientRoom(client, roomName){

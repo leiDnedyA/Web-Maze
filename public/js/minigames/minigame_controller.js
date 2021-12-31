@@ -10,14 +10,25 @@ update(deltaTime) --> called on every tick and given deltaTime in milliseconds
 */
 
 class MinigameController{
+
+    /**
+     * 
+     * @param {Socket} socket instance of socket
+     * @param {ChatBox} chatBox instance of ChatBox
+     */
     constructor(socket, chatBox){
         this.canvas = document.createElement('canvas');
         this.canvas.classList.add('minigameCanvas');
+
+        this.endButton = document.createElement('button');
+        this.endButton.innerHTML = 'x';
+        this.endButton.classList.add('endMinigameButton');
 
         this.overlay = document.createElement('div');
         this.overlay.classList.add('overlay');
 
         this.overlay.appendChild(this.canvas);
+        this.overlay.appendChild(this.endButton);
 
         this.chatBox = chatBox;
 
@@ -26,12 +37,18 @@ class MinigameController{
     
         this.active = false;
 
+        this.currentSession = {
+            id: null,
+        };
+
         this.currentMinigameInstance; //will hold the current instance of whatever minigame is being played
 
-        //an object containing methods that will return a new instance of the minigame referenced
         this.newMinigameInstance = {
             pong : (instanceID)=>{
                 return new PongInstance(instanceID, this.socket, this.canvas);
+            }, 
+            drawing: (instanceID)=>{
+                return new DrawingMinigameInstance(instanceID, this.socket, this.canvas);
             }
         }
 
@@ -58,27 +75,54 @@ class MinigameController{
         this.socket.on("minigameInit", (data)=>{
             if(this.currentMinigameInstance == null){
                 this.socket.emit("minigameConfirm", {ready: true});
-
+                this.socket.once("endMinigameSession", (data)=>{
+                    this.endSession();
+                })
                 this.startMinigame(data.instanceID, data.gamemode, data.participants);
 
             }else{
                 this.socket.emit("minigameConfirm", {ready: false, message: "Client already playing minigame!"});
             }
         })
+
+        this.socket.on("minigameData", (data)=>{
+            if(this.currentMinigameInstance == null || data.sessionID != this.currentSession.id){
+                console.log('WARNING: recieving minigame data from the wrong minigame!');
+            }else{
+                this.currentMinigameInstance.handleServerInput(data);
+            }
+        })
+
+        this.endButton.addEventListener('click', ()=>{
+            //think about adding popup to confirm that the user wants to end the game
+            this.endSession();
+        })
     }
 
+    /**
+     * 
+     * @param {number} deltaTime time in milliseconds since the last update 
+     */
     update(deltaTime){
         if(this.active){
-            this.currentMinigameInstance.update();
+            this.currentMinigameInstance.update(deltaTime);
         }
     }
 
+    /**
+     * Starts minigame session on client
+     * @param {number} instanceID 
+     * @param {string} gamemode 
+     * @param {Array.<string>} participants 
+     */
     startMinigame(instanceID, gamemode, participants){
 
         //should check with server to make sure the minigame instance is actually running
 
         if(this.newMinigameInstance.hasOwnProperty(gamemode)){
+            this.currentMinigameInstance = this.newMinigameInstance[gamemode](instanceID);
             this.startSession();
+            this.currentSession.id = instanceID;
         }else{
             this.endSession();
             console.log("WARNING: method startMinigame was passed in a gamemode that doesn't exist!");
@@ -92,8 +136,11 @@ class MinigameController{
     }
 
     endSession(){
+        this.socket.removeAllListeners("endMinigameSession");
+        this.socket.emit('endMinigameSession', {sessionID: this.currentSession.id});
         this.active = false;
         this.hideCanvas();
+        this.currentSession.id = null;
     }
 
     showCanvas(){
