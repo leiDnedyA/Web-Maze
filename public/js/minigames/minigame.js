@@ -10,7 +10,7 @@
 class Minigame{
     constructor(instanceID, socket, canvas){
         this.instanceID = instanceID;
-        this.socket = this.socket;
+        this.socket = socket;
         this.canvas = canvas;
         this.ctx = this.canvas.getContext('2d');
 
@@ -32,8 +32,17 @@ class Minigame{
 
     }
 
+    /**
+     * 
+     * Sends data about minigame to server
+     * @param {{backgroundData: Object, gameData: Object}} data data to emit through socket
+     */
+    emitData(data){
+        this.socket.emit('clientMinigameData', data);
+    }
+
     handleServerInput(data){
-        console.log(data);
+        // console.log(data);
     }
 
 }

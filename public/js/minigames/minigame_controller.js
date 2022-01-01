@@ -73,10 +73,13 @@ class MinigameController{
         document.body.appendChild(this.overlay);
 
         this.socket.on("minigameInit", (data)=>{
+
+            console.log(data);
+
             if(this.currentMinigameInstance == null){
                 this.socket.emit("minigameConfirm", {ready: true});
                 this.socket.once("endMinigameSession", (data)=>{
-                    this.endSession();
+                    this.endSession(data.message);
                 })
                 this.startMinigame(data.instanceID, data.gamemode, data.participants);
 
@@ -87,7 +90,8 @@ class MinigameController{
 
         this.socket.on("minigameData", (data)=>{
             if(this.currentMinigameInstance == null || data.sessionID != this.currentSession.id){
-                console.log('WARNING: recieving minigame data from the wrong minigame!');
+                // console.log(`Client session ID: ${this.currentSession.id}, Server session ID: ${data.sessionID}`)
+                // console.log('WARNING: recieving minigame data from the wrong minigame!');
             }else{
                 this.currentMinigameInstance.handleServerInput(data);
             }
@@ -117,6 +121,8 @@ class MinigameController{
      */
     startMinigame(instanceID, gamemode, participants){
 
+
+        // console.log(`instanceID: ${instanceID}, gamemode: ${gamemode}`);
         //should check with server to make sure the minigame instance is actually running
 
         if(this.newMinigameInstance.hasOwnProperty(gamemode)){
@@ -135,12 +141,16 @@ class MinigameController{
         this.showCanvas();
     }
 
-    endSession(){
+    endSession(message){
         this.socket.removeAllListeners("endMinigameSession");
         this.socket.emit('endMinigameSession', {sessionID: this.currentSession.id});
         this.active = false;
         this.hideCanvas();
         this.currentSession.id = null;
+        this.currentMinigameInstance = null;
+        if(message){
+            alert(message);
+        }
     }
 
     showCanvas(){

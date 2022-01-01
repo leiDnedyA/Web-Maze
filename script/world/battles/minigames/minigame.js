@@ -6,6 +6,8 @@ Will be inherited by all minigames and will act as the
 blueprint for how the World class interacts with minigames
 */
 
+//SERVER!!
+
 class Minigame{
     constructor(gamemode, participants, endCallback){
         this.gamemode = gamemode; //string containing gamemode name
@@ -15,15 +17,21 @@ class Minigame{
         this.id = parseInt(Math.random() * 10000000);
 
         this.toString = this.toString.bind(this);
-        
+
         this.init = this.init.bind(this);
         this.start = this.start.bind(this);
         this.end = this.end.bind(this);
         this.update = this.update.bind(this);
+        this.handleClientDisconnect = this.handleClientDisconnect.bind(this);
         this.updateClients = this.updateClients.bind(this);
         this.checkPlayerResponses = this.checkPlayerResponses.bind(this);
+        this.handleClientInput = this.handleClientInput.bind(this);
     }
 
+    /**
+     * 
+     * @returns {String} with info about the minigame instance including its ID, gamemode, and the participants list
+     */
     toString(){
 
         let participantsString = this.participants.reduce((reducer, element, index, array)=>{
@@ -69,6 +77,9 @@ class Minigame{
                     this.end;
                 }
             })
+            this.participants[i].socket.on("disconnect", (data)=>{
+                this.handleClientDisconnect(this.participants[i]);
+            })
 
             setTimeout(()=>{
                 if(this.checkPlayerResponses()){
@@ -82,6 +93,10 @@ class Minigame{
 
 
         
+    }
+
+    handleClientDisconnect(client){
+        this.end(`Client "${client.username}" disconnected from the server`);
     }
 
     checkPlayerResponses(){
@@ -114,7 +129,8 @@ class Minigame{
     end(message){
 
         for(let i in this.participants){
-            this.participants[i].emit("endMinigameSession", {message: message, sessionID: this.id});
+            this.participants[i].socket.emit("endMinigameSession", {message: message, sessionID: this.id});
+            this.participants[i].socket.removeAllListeners("clientMinigameData");
         }
 
         this.endCallback(this.id);
@@ -132,6 +148,20 @@ class Minigame{
 
     update(deltaTime, gameData){
         this.updateClients(gameData);
+    }
+
+    /**
+     * 
+     * Takes data from the client's socket emit of "clientMinigameData"
+     * Only requires the 'backgroundData' property of the data obj, but will work reguardless
+     * 
+     * @param {Number} clientID id of the client who sent the data
+     * @param {Object} data client input data 
+     */
+    handleClientInput(clientID, data){
+        if(data){
+            
+        }
     }
 
 }

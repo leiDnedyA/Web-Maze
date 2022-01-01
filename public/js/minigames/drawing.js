@@ -1,29 +1,41 @@
 
+//CLIENT!!
+
 class DrawingMinigameInstance extends Minigame{
     constructor(instanceID, socket, canvas){
         super(instanceID, socket, canvas);
     
 
         this.gameVars = {
-            mouseDown : false
+            mousePos : {
+                x: null,
+                y: null,
+            }
         }
 
-        this.canvas.addEventListener("mousedown", this.handleMouseDown);
-        this.canvas.addEventListener("mouseup", this.handleMouseUp);
-
-        this.handleMouseDown = this.handleMouseDown.bind(this);
-        this.handleMouseUp = this.handleMouseUp.bind(this);
-
+        
+        
+        this.updateMousePos = this.updateMousePos.bind(this);
+        this.handleMouseMove = this.handleMouseMove.bind(this);
         this.update = this.update.bind(this);
         this.render = this.render.bind(this);
+    
+        this.canvas.addEventListener('mousemove', this.handleMouseMove);
+        this.canvas.addEventListener('mousedown', this.updateMousePos);
+    
     }
 
-    handleMouseDown(e){
-        console.log(`Mouse down at (${e.clientX}, ${e.clientY})`);
+    
+    
+    updateMousePos(e){
+        this.gameVars.mousePos.x = e.clientX;
+        this.gameVars.mousePos.y = e.clientY;
+        super.emitData({ backgroundData: {}, gameData: { mousePos: this.gameVars.mousePos } });
     }
 
-    handleMouseUp(e) {
-        console.log(`Mouse up at (${e.clientX}, ${e.clientY})`);
+    handleMouseMove(e) {
+        if (e.buttons !== 1) { return };
+        this.updateMousePos(e);
     }
 
     update(deltaTime){
