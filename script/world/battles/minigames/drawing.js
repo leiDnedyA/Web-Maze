@@ -22,7 +22,7 @@ class DrawingMinigameInstance extends Minigame{
         this.init = this.init.bind(this);
         this.update = this.update.bind(this);
         this.handleClientInput = this.handleClientInput.bind(this);
-        this.lineList = {}; //has a property for each client's ID which holds a list of their lines
+        // this.lineList = {}; //has a property for each client's ID which holds a list of their lines
 
         /**
          * Should store player data with the key being the client's ID
@@ -36,6 +36,8 @@ class DrawingMinigameInstance extends Minigame{
         for(let i in this.participants){
             let currentGameData = super.getGameDataCopy();
             currentGameData[this.participants[i].id] = {lines: [], lastLine: Date.now()};
+
+            // this.lineList[this.participants[i].id] = [];
 
             super.setGameData(currentGameData);
 
@@ -67,6 +69,7 @@ class DrawingMinigameInstance extends Minigame{
             if((Date.now() - currentGameData[clientID].lastLine) / 1000 > config.newLineDelay){
                 currentGameData[clientID].lastLine = Date.now();
                 currentGameData[clientID].lines.push(lineObj);
+                super.setGameData(currentGameData);
             }
         }
 
@@ -80,17 +83,19 @@ class DrawingMinigameInstance extends Minigame{
      * - the client hasn't gone over the line speed limit
      * - the line is under the max point limit
      * @param {{clientID: Number, line: Array.<Number[]>}} lineObj 
-     * @returns {Object | Boolean}
+     * @returns {Array.<Number[]> | Boolean}
      */
-    filterLineObj(lineObj){
-        if(lineObj.hasOwnProperty(line)){
-            if(lineObj.length < config.maxLineLength){
-                return { clientID: lineObj.clientID, line: lineObj.line.filter((v, i)=>{
-                    if(typeof v == Number && i <= 1){
-                        return true;
-                    }
-                    return false;
-                }) }
+    filterLineObj(lineObj) {
+        if (lineObj.hasOwnProperty("line")) {
+            if (lineObj.line.length < config.maxLineLength) {
+                return {
+                    clientID: lineObj.clientID, line: lineObj.line.filter((v, i) => {
+                        if (typeof v[0] == "number" && typeof v[1] == "number" && v.length == 2) {
+                            return true;
+                        }
+                        return false;
+                    })
+                }
             }
         }
         return false;
@@ -107,14 +112,13 @@ class DrawingMinigameInstance extends Minigame{
      * @param {Object} data raw data object from client
      */
     handleClientInput(clientID, data){
-        console.log(data);
         if(data){
             super.handleClientInput(clientID, { backgroundData: data.backgroundData });
             if (data.hasOwnProperty('gameUpdate')) {
                 if(data.gameUpdate.hasOwnProperty('newLine')){
                     let filteredList = this.filterLineObj({clientID: clientID, line: data.gameUpdate.newLine});
                     if(filteredList){
-                        
+                        this.addLine(filteredList.clientID, filteredList.line);
                     }
                 }
             }

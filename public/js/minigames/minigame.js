@@ -13,10 +13,12 @@ class Minigame{
         this.socket = socket;
         this.canvas = canvas;
         this.ctx = this.canvas.getContext('2d');
+        this.gameData;
 
         this.update = this.update.bind(this);
         this.render = this.render.bind(this);
         this.handleServerInput = this.handleServerInput.bind(this);
+        this.getGameData = this.getGameData.bind(this);
     }
 
     /**
@@ -42,7 +44,15 @@ class Minigame{
     }
 
     handleServerInput(data){
-        // console.log(data);
+        if(data){
+            if(data.hasOwnProperty('gameData')){
+                this.gameData = data.gameData;
+            }
+        }
+    }
+
+    getGameData(){
+        return this.gameData;
     }
 
 }
