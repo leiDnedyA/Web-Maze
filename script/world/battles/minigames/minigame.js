@@ -8,6 +8,16 @@ blueprint for how the World class interacts with minigames
 
 //SERVER!!
 
+
+/**
+ * NOTES FOR USE / DOCUMENTATION:
+ * 
+ * -All data about minigame should be stored by calling super.setGameData(gameData)
+ * -Client input should be accessed with the method getClientInput()
+ * -this.update is meant to be overwritten but make sure to pass in deltaTime e.g call super.update(deltaTime)
+ * 
+ */
+
 class Minigame{
     constructor(gamemode, participants, endCallback){
         this.gamemode = gamemode; //string containing gamemode name
@@ -18,14 +28,21 @@ class Minigame{
 
         this.toString = this.toString.bind(this);
 
+        this.gameData = {};
+
+        //checks if this.gameData has been changed since the last call of updateClients() to save resources
+        this.isGameDataDifferent = false;
+
         this.init = this.init.bind(this);
         this.start = this.start.bind(this);
         this.end = this.end.bind(this);
         this.update = this.update.bind(this);
+        this.setGameData = this.setGameData.bind(this);
         this.handleClientDisconnect = this.handleClientDisconnect.bind(this);
         this.updateClients = this.updateClients.bind(this);
         this.checkPlayerResponses = this.checkPlayerResponses.bind(this);
         this.handleClientInput = this.handleClientInput.bind(this);
+        this.getGameDataCopy = this.getGameDataCopy.bind(this); //returns a copy of this.gameData
     }
 
     /**
@@ -137,17 +154,43 @@ class Minigame{
     }
 
     /**
-     * Emits game data to clients' sockets
+     * Emits gameData to clients
      * @param {Object} gameData holds all data for the specific minigame being played
      */
-    updateClients(gameData){
-        for(let i in this.participants){
-            this.participants[i].socket.emit("minigameData", {sessionID: this.id, gameData: gameData});
+    updateClients(){
+
+        if(this.isGameDataDifferent){
+            for (let i in this.participants) {
+                this.participants[i].socket.emit("minigameData", { sessionID: this.id, gameData: this.gameData });
+            }
+            this.isGameDataDifferent = false;
         }
     }
 
-    update(deltaTime, gameData){
-        this.updateClients(gameData);
+    update(deltaTime){
+        this.updateClients();
+    }
+
+    /**
+     * Updates this.gameData variable
+     * @param {Object} gameData meant to store data specific to the minigame being played
+     */
+    setGameData(gameData){
+        if(gameData !== this.gameData){
+            this.isGameDataDifferent = true;
+            this.gameData = gameData;
+        }
+    }
+
+    /**
+     * Returns a copy of this.gameData.
+     * 
+     * @returns {Object} copy of this.gameData
+     */
+    getGameDataCopy(){
+        let tempData = {};
+        Object.assign(tempData, this.gameData);
+        return tempData;
     }
 
     /**

@@ -24,12 +24,12 @@ class Minigame{
      * @param {number} deltaTime deltaTime in milliseconds
      */
     update(deltaTime){
-        this.ctx.fillStyle = "black";
-        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height)
+        
     }
 
     render(){
-
+        this.ctx.fillStyle = "white";
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height)
     }
 
     /**

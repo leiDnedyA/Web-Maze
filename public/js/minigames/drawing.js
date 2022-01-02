@@ -5,37 +5,62 @@ class DrawingMinigameInstance extends Minigame{
     constructor(instanceID, socket, canvas){
         super(instanceID, socket, canvas);
     
-
-        this.gameVars = {
-            mousePos : {
-                x: null,
-                y: null,
-            }
+        this.config = {
+            minPointDistance: 20
         }
 
-        
+        this.gameVars = {
+            currentLine: [],
+            mouseDown : false
+        }
+
+        this.worldData = {
+            lines: []
+        }        
         
         this.updateMousePos = this.updateMousePos.bind(this);
+        this.handleMouseDown = this.handleMouseDown.bind(this);
         this.handleMouseMove = this.handleMouseMove.bind(this);
+        this.handleMouseUp = this.handleMouseUp.bind(this);
         this.update = this.update.bind(this);
         this.render = this.render.bind(this);
-    
+        this.resetGameVars = this.resetGameVars.bind(this);
+
         this.canvas.addEventListener('mousemove', this.handleMouseMove);
-        this.canvas.addEventListener('mousedown', this.updateMousePos);
+        this.canvas.addEventListener('mousedown', this.handleMouseDown);
+        window.addEventListener('mouseup', this.handleMouseUp);
     
     }
 
     
     
+    handleMouseDown(e){
+        this.gameVars.mouseDown = true;
+        this.updateMousePos(e);
+    }
+
     updateMousePos(e){
-        this.gameVars.mousePos.x = e.clientX;
-        this.gameVars.mousePos.y = e.clientY;
-        super.emitData({ backgroundData: {}, gameData: { mousePos: this.gameVars.mousePos } });
+
+        let currentMousePos = [e.clientX - this.canvas.offsetLeft, e.clientY - this.canvas.offsetTop];
+        if(this.gameVars.currentLine.length > 0){
+            let lastCurrentLineIndex = this.gameVars.currentLine.length - 1;
+            if (Math.abs(currentMousePos[0] - this.gameVars.currentLine[lastCurrentLineIndex][0]) >= this.config.minPointDistance || Math.abs(currentMousePos[1] - this.gameVars.currentLine[lastCurrentLineIndex][1]) >= this.config.minPointDistance) {
+                this.gameVars.currentLine.push(currentMousePos);
+            }
+        }else{
+            this.gameVars.currentLine.push(currentMousePos);
+        }
+        
     }
 
     handleMouseMove(e) {
         if (e.buttons !== 1) { return };
         this.updateMousePos(e);
+    }
+
+    handleMouseUp(e) {
+        super.emitData({backgroundData: {}, gameUpdate: {newLine: this.gameVars.currentLine}});
+        this.resetGameVars();
     }
 
     update(deltaTime){
@@ -45,5 +70,27 @@ class DrawingMinigameInstance extends Minigame{
 
     render(){
         super.render();
+
+        //render current line
+
+        if(this.gameVars.currentLine.length > 0){
+            this.ctx.strokeStyle = 'black';
+            this.ctx.lineWidth = 1;
+            this.ctx.beginPath();
+            this.ctx.moveTo(this.gameVars.currentLine[0][0], this.gameVars.currentLine[0][1]);
+            for (let i = 1; i < this.gameVars.currentLine.length; i++) {
+                this.ctx.lineTo(this.gameVars.currentLine[i][0], this.gameVars.currentLine[i][1]);
+            }
+            this.ctx.stroke();
+        }
+
+        //render worldData lines
+
     }
+
+    resetGameVars() {
+        this.gameVars.currentLine = [];
+        this.gameVars.mouseDown = false;
+    }
+
 }

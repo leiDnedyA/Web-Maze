@@ -30,6 +30,8 @@ class MinigameController{
         this.overlay.appendChild(this.canvas);
         this.overlay.appendChild(this.endButton);
 
+        window.addEventListener('resize', this.resizeCanvas);
+
         this.chatBox = chatBox;
 
         this.socket = socket;
@@ -59,6 +61,7 @@ class MinigameController{
         this.endSession = this.endSession.bind(this);
         this.showCanvas = this.showCanvas.bind(this);
         this.hideCanvas = this.hideCanvas.bind(this);
+        this.resizeCanvas = this.resizeCanvas.bind(this);
 
     }
     
@@ -69,7 +72,7 @@ class MinigameController{
     init(clientID){
 
         this.clientID = clientID;
-
+        this.resizeCanvas();
         document.body.appendChild(this.overlay);
 
         this.socket.on("minigameInit", (data)=>{
@@ -159,6 +162,11 @@ class MinigameController{
 
     hideCanvas(){
         this.overlay.style.visibility = "hidden";
+    }
+
+    resizeCanvas() {
+        this.canvas.width = window.innerWidth * .4;
+        this.canvas.height = window.innerHeight * .4;
     }
 
 }
