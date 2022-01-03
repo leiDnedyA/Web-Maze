@@ -74,10 +74,16 @@ class World {
         return (Object.keys(this.players).length >= this.maxPlayers)
     }
 
+    /**
+     * Adds entity to a specific room
+     * 
+     * @param {Entity} entity 
+     * @param {string} room name of room 
+     */
     addEntity(entity, room){
         this.physicsEngine.addEntity(entity);
         if(room){
-            this.physicsEngine.entities[entity.id].setRoom(room);
+            this.physicsEngine.entities[entity.id].setRoom(room, this.rooms[room].startPos);
         }else{
             this.physicsEngine.entities[entity.id].setRoom(this.worldData.startRoom);
         }
@@ -100,7 +106,7 @@ class World {
 
     changeClientRoom(client, roomName){
         client.setRoom(roomName, this.worldData.roomList[roomName]);
-        this.physicsEngine.entities[client.id].setRoom(roomName);
+        this.physicsEngine.entities[client.id].setRoom(roomName, this.rooms[roomName].startPos);
     }
 
     removeEntity(id){

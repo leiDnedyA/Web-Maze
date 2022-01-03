@@ -12,6 +12,7 @@ class Client {
         this.player = null;
 
         this.world = null;
+        this.lastRoomSwitch = 0;
 
         this.emit = this.emit.bind(this);
 
@@ -74,6 +75,7 @@ class Client {
     setRoom(roomName, data){
         this.room = roomName;
         this.socket.emit('roomUpdate', {tileMap: data.tileMap});
+        this.lastRoomSwitch = Date.now();
     }
 
 }
