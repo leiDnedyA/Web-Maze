@@ -3,6 +3,8 @@ const Player = require('./entities/player.js');
 const PhysicsEngine = require('./physics/physics.js');
 const Vector2 = require('./physics/vector2.js');
 const ActionsHandler = require('./actionsHandler.js')
+const BattleRequestHandler = require('./battles/battle_request_handler.js');
+const MinigameHandler = require('./battles/minigames/minigame_handler.js');
 
 class World {
     constructor(name = 'Sample World', maxPlayers = 20, tickSpeed = 30, worldData) {
@@ -17,15 +19,20 @@ class World {
         this.actionsHandler = new ActionsHandler(this);
         this.physicsEngine = new PhysicsEngine(this.tickSpeed, this.rooms);
         this.chat = new Chat(this.clients);
-        // this.clientHandler --> make a class for the world to communicate with clients
+        this.battleRequestHandler = new BattleRequestHandler((participants, gamemode)=>{
+            this.newMinigame(participants, gamemode);
+        });
+        this.minigameHandler = new MinigameHandler();
 
         this.update = this.update.bind(this);
         this.isFull = this.isFull.bind(this);
+        this.newBattleRequest = this.newBattleRequest.bind(this);
         this.requestPlayerJoin = this.requestPlayerJoin.bind(this);
         this.playerDisconnect = this.playerDisconnect.bind(this);
         this.getCurrentPlayers = this.getCurrentPlayers.bind(this);
         this.changeClientRoom = this.changeClientRoom.bind(this);
         this.emitChat = this.emitChat.bind(this);
+        this.newMinigame = this.newMinigame.bind(this);
     }
 
     update(deltaTime) {
@@ -33,6 +40,8 @@ class World {
         //updating clients on world data
         this.physicsEngine.update(deltaTime);
         this.actionsHandler.handleAllActions(this.clients, this.worldData);        
+        this.battleRequestHandler.update();
+        this.minigameHandler.update(deltaTime);
 
         let entityList = this.physicsEngine.getEntityList();
         
@@ -72,6 +81,21 @@ class World {
         }else{
             this.physicsEngine.entities[entity.id].setRoom(this.worldData.startRoom);
         }
+    }
+
+    newBattleRequest(senderID, recieverID, gamemode){
+        //takes Client ID for sender and reciever
+        if (!this.clients.hasOwnProperty(senderID)){
+            throw('A client with the id senderID does not exist in this world!')
+        }
+        if(!this.clients.hasOwnProperty(recieverID)){  
+            throw ('A client with the id recieverID does not exist in this world!')
+        }
+        this.battleRequestHandler.newBattleRequest(this.clients[senderID], this.clients[recieverID], gamemode);
+    }
+
+    newMinigame(participants, gamemode){
+        this.minigameHandler.newMinigame(participants, "drawing"); //eventually change 'drawing' to show the gamemode requested by the players
     }
 
     changeClientRoom(client, roomName){

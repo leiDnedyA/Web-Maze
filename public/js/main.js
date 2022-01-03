@@ -8,6 +8,8 @@ const chatInput = document.querySelector("#chatInput");
 const chatBoxDiv = document.querySelector('#chatBox');
 const usernameInput = document.querySelector("#usernameInput");
 const loadingText = document.createElement("h2");
+const mainPageDiv = document.querySelector("#mainPageDiv");
+
 loadingText.innerHTML = "loading...";
 
 var worldTableElement = null;
@@ -18,6 +20,7 @@ const updateFunc = (deltaTime) => {
     chat.update();
     socket.emit('inputData', charController.getKeysDown());
     canvasController.setCameraOffset(renderer.cameraOffset);
+    minigameController.update(deltaTime);
 }
 
 //model related stuff
@@ -28,9 +31,10 @@ const charController = new CharController();
 
 //view controllers
 const canvasController = new CanvasController(gameCanvas, renderer.unitSize);
-const battleRequestHandler = new BattleRequestHandler();
+const battleRequestHandler = new BattleRequestHandler(socket);
 const chatBox = new ChatBox(chatBoxDiv);
 const chat = new Chat(socket, chatBox, chatForm, chatInput);
+const minigameController = new MinigameController(socket, chatBox);
 
 const contextMenuOptions = {
     "wave": {
@@ -48,23 +52,30 @@ const contextMenuOptions = {
             return true;
         }
     },
-    "request battle": {
+    "play drawing": {
         callback: (target) => {
             if (target) {
-                socket.emit("battleRequest", { targetID: target.id });
-                chatBox.newOutgoingBattleRequest({name: target.name});
+                socket.emit("battleRequest", { targetID: target.id, gamemode: 'drawing' });
             }
         },
         condition: (target)=>{
-            // console.log(target)
-            // if (target == null) {
-            //     return false;
-            // }
-            // if (target.id == clientID) {
-            //     return false;
-            // }
+            if (target == null) {
+                return false;
+            }
+            if (target.id == clientID) {
+                return false;
+            }
 
-            // return true;
+            return true;
+        }
+    },
+    "play pong": {
+        callback: (target) =>{
+            // if(target){
+            //     socket.emit("battleRequest", {targetID: target.id, gamemode: 'pong'})
+            // }
+        }, 
+        condition: (target)=>{
             return false;
         }
     }
@@ -113,8 +124,9 @@ loginForm.addEventListener('submit', (e) => {
         worldTableElement = generateWorldTable(data.worldList, socket, awaitJoinWorld);
         document.body.appendChild(worldTableElement);
         clientID = data.id;
-        renderer.setCameraTargetID(data.id);
-        console.log(`Client ID: ${data.id}`);
+        renderer.setCameraTargetID(clientID);
+        console.log(`Client ID: ${clientID}`);
+        minigameController.init(clientID);
     })
     socket.on("roomUpdate", (data) => {
         renderer.setTileMap(data.tileMap);
@@ -127,8 +139,26 @@ loginForm.addEventListener('submit', (e) => {
         canvasController.setGameObjects(world.getGameObjects());
     })
     socket.on("wave", (data) => {
-        console.log(`${data.senderName} waved to you!`);
-        chatBox.newWave(data);
+        if(data.senderID == clientID){
+            console.log(`You waved to yourself!`);
+            chatBox.newWave(data, true);
+        }else{
+            console.log(`${data.senderName} waved to you!`);
+            chatBox.newWave(data, false);
+        }
+    })
+    socket.on("sentBattleRequest", (data)=>{
+        let reciever = world.getGameObjectByID(data.recieverID);
+        chatBox.newSentBattleRequest(reciever, data.gamemode);
+        console.log(`Battle request successfully sent to ${reciever.name}.`);
+    })
+    socket.on("recievedBattleRequest", (data)=>{
+        console.log(data);
+        let sender = world.getGameObjectByID(data.senderID);
+        chatBox.newRecievedBattleRequest(sender, data.gamemode);
+        console.log(`Battle request recieved from ${sender.name}`);
+        battleRequestHandler.newRequest(data.requestID, sender, data.gamemode);
     })
     loginForm.style.display = 'none';
+    mainPageDiv.style.display = 'none';
 })

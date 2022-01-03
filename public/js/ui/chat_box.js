@@ -19,8 +19,8 @@ class ChatBox{
         this.start = this.start.bind(this);
         this.show = this.show.bind(this);
         this.hide = this.hide.bind(this);
-        this.newIncomingBattleRequest = this.newIncomingBattleRequest.bind(this);
-        this.newOutgoingBattleRequest = this.newOutgoingBattleRequest.bind(this);
+        this.newRecievedBattleRequest = this.newRecievedBattleRequest.bind(this);
+        this.newSentBattleRequest = this.newSentBattleRequest.bind(this);
         this.newChat = this.newChat.bind(this);
         this.newWave = this.newWave.bind(this);
     }
@@ -53,29 +53,33 @@ class ChatBox{
         this.domElement.style.display = 'none';
     }
 
-    newIncomingBattleRequest(recipient){
+    newRecievedBattleRequest(sender, gamemode){
         /*
         Recipient should be an object containing a name and more things in future
         */
 
-        this.addMessage(`${this.getPlayerNameHTML(recipient.name)} requested to battle you!`);
+        this.addMessage(`${this.getPlayerNameHTML(sender.name)} requested to battle you in the gamemode <em>${gamemode}</em>!`);
     }
 
-    newOutgoingBattleRequest(recipient){
+    newSentBattleRequest(reciever, gamemode){
 
         /* 
         Recipient should be an object containing a name and more things in future
         */
 
-        this.addMessage(`You requested to battle ${this.getPlayerNameHTML(recipient.name)}`)
+        this.addMessage(`You requested to battle ${this.getPlayerNameHTML(reciever.name)} in the gamemode <em>${gamemode}</em>!`)
     }
 
     newChat(data){
         this.addMessage(`[${this.getPlayerNameHTML(data.clientName)}]: ${data.message}`);
     }
 
-    newWave(data){
-        this.addMessage(`${this.getPlayerNameHTML(data.senderName)} waved to you!`);
+    newWave(data, wavedToSelf){
+        if (wavedToSelf){
+            this.addMessage(`You waved to yourself!`);
+        }else{
+            this.addMessage(`${this.getPlayerNameHTML(data.senderName)} waved to you!`);
+        }
     }
     
     getPlayerNameHTML(playerName){

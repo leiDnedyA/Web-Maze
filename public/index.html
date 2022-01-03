@@ -6,12 +6,18 @@
     <body>
         <div id="battleRequestNotification">
             <p id="battleRequestNotificationText">Sample battle request</p>
-            <button id="battleRequestNotificationAccept">Accept</button> <button id="battleRequestNotificationDecline">Decline</button>
+            <p id="battleRequestNotificationButtons"><button id="battleRequestNotificationAccept">Accept</button><button
+                id="battleRequestNotificationDecline">Decline</button></p>
         </div>
         <form id="loginForm">
             <input type="text" id="usernameInput" placeholder="Username">
-            <button type="submit">Submit</button>
+            <button type="submit">Login</button>
         </form>
+        <div id="mainPageDiv">
+            <h3>Welcome to my game!</h3>
+            <p><em>What's new?</em>: A drawing "minigame" has just arrived! Click on another player and select "play drawing" to launch a canvas that you can draw on together!</p>
+            <p><em>Controls...</em> overworld movement: WASD, enter door: SPACEBAR, interact with player: LEFT OR RIGHT CLICK</p>
+        </div>
         <canvas id="gameCanvas"></canvas>
         <form id="chatForm" style="display: none;">
             <input type="text" id="chatInput" placeHolder="Send chat...">
@@ -21,10 +27,21 @@
             
         </div>
         <script src="/socket.io/socket.io.js"></script>
+
+        
+        <script src="js/minigames/minigame.js"></script>
+        <!-- Start of minigame list -->
+        <script src="js/minigames/rock_paper_scissors.js"></script>
+        <script src="js/minigames/pong.js"></script>
+        <script src="js/minigames/drawing.js"></script>
+        <!-- End of minigame list -->
+        <script src="js/minigames/minigame_controller.js"></script>
+        
         <script src="js/gfx/tile_map.js"></script>
         <script src="js/ui/context_menu.js"></script>
         <script src="js/ui/chat_box.js"></script>
         <script src="js/ui/domElements.js"></script>
+        
         <script src="js/ui/battle_request.js"></script>
         <script src="js/ui/chat.js"></script>
         <script src="js/world/physics.js"></script>
@@ -34,6 +51,7 @@
         <script src="js/world/world.js"></script>
         <script src="js/ui/domElements.js"></script>
         <script src="js/engine.js"></script>
+        
         <script src="js/main.js"></script>
     </body>
 </html>
