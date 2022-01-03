@@ -10,6 +10,8 @@ Will handle battle requests -- meant to be used within the context of a specific
 
 const BattleRequest = require("./battle_request");
 
+const validGamemodes = ["drawing"];
+
 class BattleRequestHandler{
     constructor(acceptRequestCallback, requestTimeOut = 30){
 
@@ -34,21 +36,34 @@ class BattleRequestHandler{
         }
     }
 
-    newBattleRequest(sender, reciever){
-        //takes Client objects for the sender and reciever of the request
-        let request = new BattleRequest(sender, reciever);
-        this.liveRequests[request.id] = request;
-
-        reciever.socket.once("battleRequestResponse", (data)=>{
-            if(data.isAccept){
-                this.acceptRequest(request, sender, reciever);
-            }else{
-                this.declineRequest(request, sender, `Request to battle ${reciever.username} declined...`);
+    checkValidGamemode(gamemode){
+        for(let i in validGamemodes){
+            if(validGamemodes[i] === gamemode){
+                return true;
             }
-        });
+        }
+        return false;
+    }
 
-        console.log(`Battle request created from ${sender.username} to ${reciever.username}`);
+    newBattleRequest(sender, reciever, gamemode){
+        if(this.checkValidGamemode(gamemode)){
+            //takes Client objects for the sender and reciever of the request
+            let request = new BattleRequest(sender, reciever, gamemode);
+            this.liveRequests[request.id] = request;
 
+            reciever.socket.once("battleRequestResponse", (data) => {
+                if (data.isAccept) {
+                    this.acceptRequest(request, sender, reciever);
+                } else {
+                    this.declineRequest(request, sender, `Request to battle ${reciever.username} declined...`);
+                }
+            });
+
+            console.log(`Battle request created from ${sender.username} to ${reciever.username}`);
+   
+        }else{
+            console.log(`Battle request error: ${gamemode} is not a valid gamemode!`);
+        }
     }
 
     declineRequest(request, sender, message){

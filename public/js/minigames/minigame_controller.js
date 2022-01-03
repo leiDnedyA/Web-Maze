@@ -84,7 +84,7 @@ class MinigameController{
                 this.socket.once("endMinigameSession", (data)=>{
                     this.endSession(data.message);
                 })
-                this.startMinigame(data.instanceID, data.gamemode, data.participants);
+                this.startMinigame(data.instanceID, data.gamemode, data.participants, data.startMessage);
 
             }else{
                 this.socket.emit("minigameConfirm", {ready: false, message: "Client already playing minigame!"});
@@ -121,8 +121,9 @@ class MinigameController{
      * @param {number} instanceID 
      * @param {string} gamemode 
      * @param {Array.<string>} participants 
+     * @param {string} startMessage comes up on screen in alert
      */
-    startMinigame(instanceID, gamemode, participants){
+    startMinigame(instanceID, gamemode, participants, startMessage){
 
 
         // console.log(`instanceID: ${instanceID}, gamemode: ${gamemode}`);
@@ -132,6 +133,9 @@ class MinigameController{
             this.currentMinigameInstance = this.newMinigameInstance[gamemode](instanceID);
             this.startSession();
             this.currentSession.id = instanceID;
+            setTimeout(()=>{
+                alert(startMessage);
+            }, 40);
         }else{
             this.endSession();
             console.log("WARNING: method startMinigame was passed in a gamemode that doesn't exist!");

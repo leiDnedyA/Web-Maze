@@ -1,7 +1,7 @@
 const Minigame = require("./minigame.js");
 
 const config = {
-    maxLineLength : 100, //length represented in number of points
+    maxLineLength : 1000, //length represented in number of points
     newLineDelay : .1 //minimum number of seconds between each new line from each client
 }
 
@@ -17,7 +17,7 @@ const config = {
 
 class DrawingMinigameInstance extends Minigame{
     constructor(participants, endCallback){
-        super('drawing', participants, endCallback);
+        super('drawing', participants, endCallback, "Start drawing on the canvas! Your friend's drawing will appear along with yours. Click 'x' to end the game at any time.");
 
         this.init = this.init.bind(this);
         this.update = this.update.bind(this);

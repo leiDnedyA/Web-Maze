@@ -8,6 +8,8 @@ const chatInput = document.querySelector("#chatInput");
 const chatBoxDiv = document.querySelector('#chatBox');
 const usernameInput = document.querySelector("#usernameInput");
 const loadingText = document.createElement("h2");
+const mainPageDiv = document.querySelector("#mainPageDiv");
+
 loadingText.innerHTML = "loading...";
 
 var worldTableElement = null;
@@ -50,10 +52,10 @@ const contextMenuOptions = {
             return true;
         }
     },
-    "request battle": {
+    "play drawing": {
         callback: (target) => {
             if (target) {
-                socket.emit("battleRequest", { targetID: target.id });
+                socket.emit("battleRequest", { targetID: target.id, gamemode: 'drawing' });
             }
         },
         condition: (target)=>{
@@ -65,6 +67,16 @@ const contextMenuOptions = {
             }
 
             return true;
+        }
+    },
+    "play pong": {
+        callback: (target) =>{
+            // if(target){
+            //     socket.emit("battleRequest", {targetID: target.id, gamemode: 'pong'})
+            // }
+        }, 
+        condition: (target)=>{
+            return false;
         }
     }
 }
@@ -141,10 +153,12 @@ loginForm.addEventListener('submit', (e) => {
         console.log(`Battle request successfully sent to ${reciever.name}.`);
     })
     socket.on("recievedBattleRequest", (data)=>{
+        console.log(data);
         let sender = world.getGameObjectByID(data.senderID);
         chatBox.newRecievedBattleRequest(sender, data.gamemode);
         console.log(`Battle request recieved from ${sender.name}`);
         battleRequestHandler.newRequest(data.requestID, sender, data.gamemode);
     })
     loginForm.style.display = 'none';
+    mainPageDiv.style.display = 'none';
 })

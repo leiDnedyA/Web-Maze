@@ -19,11 +19,12 @@ blueprint for how the World class interacts with minigames
  */
 
 class Minigame{
-    constructor(gamemode, participants, endCallback){
+    constructor(gamemode, participants, endCallback, startMessage){
         this.gamemode = gamemode; //string containing gamemode name
         this.participants = participants;
         this.participantResponses = {};
         this.endCallback = endCallback;
+        this.startMessage = startMessage;
         this.id = parseInt(Math.random() * 10000000);
 
         this.toString = this.toString.bind(this);
@@ -83,7 +84,7 @@ class Minigame{
         })
         for(let i in this.participants){
             this.participantResponses[i] = false;
-            this.participants[i].socket.emit("minigameInit", {instanceID: this.id, gamemode: this.gamemode, participants: participantsArrayList});
+            this.participants[i].socket.emit("minigameInit", {instanceID: this.id, gamemode: this.gamemode, participants: participantsArrayList, startMessage: this.startMessage});
             this.participants[i].socket.once("minigameConfirm", (data)=>{
                 if(data.ready){
                     this.participantResponses[i] = true;
@@ -91,7 +92,7 @@ class Minigame{
                         this.start();
                     }
                 }else{
-                    this.end;
+                    // this.end();
                 }
             })
             this.participants[i].socket.on("disconnect", (data)=>{
@@ -132,7 +133,7 @@ class Minigame{
     start(){
         for(let i in this.participants){
             this.participants[i].socket.once("endMinigameSession", (data)=>{
-                this.end(data.message);
+                this.end(`Player ${this.participants[i].username} closed out of the game.`);
             })
         }
     }

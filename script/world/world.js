@@ -83,7 +83,7 @@ class World {
         }
     }
 
-    newBattleRequest(senderID, recieverID){
+    newBattleRequest(senderID, recieverID, gamemode){
         //takes Client ID for sender and reciever
         if (!this.clients.hasOwnProperty(senderID)){
             throw('A client with the id senderID does not exist in this world!')
@@ -91,7 +91,7 @@ class World {
         if(!this.clients.hasOwnProperty(recieverID)){  
             throw ('A client with the id recieverID does not exist in this world!')
         }
-        this.battleRequestHandler.newBattleRequest(this.clients[senderID], this.clients[recieverID]);
+        this.battleRequestHandler.newBattleRequest(this.clients[senderID], this.clients[recieverID], gamemode);
     }
 
     newMinigame(participants, gamemode){

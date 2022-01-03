@@ -196,7 +196,7 @@ io.on('connection', (socket) => {
                 socket.on('battleRequest', (data)=>{
                     // console.log(`${client.username} requested to battle ${clientList[data.targetID].username}`);
                     try{
-                        clientWorld.newBattleRequest(client.id, data.targetID);
+                        clientWorld.newBattleRequest(client.id, data.targetID, data.gamemode);
                     }catch(e){
                         console.log(`ERROR: ${e}`);
                     }
