@@ -26,8 +26,10 @@ class ActionsHandler{
 
                         let door = worldData.roomList[clientList[i].room].doors[j];
 
-                        if (Math.abs(player.position.x - (door.position[0])) < 1 && Math.abs(player.position.y - (door.position[1])) < 1) {
-                            this.world.changeClientRoom(clientList[i], door.destination);
+                        if(door){
+                            if (Math.abs(player.position.x - (door.position[0])) < 1 && Math.abs(player.position.y - (door.position[1])) < 1) {
+                                this.world.changeClientRoom(clientList[i], door.destination);
+                            }
                         }
                     }
                 }

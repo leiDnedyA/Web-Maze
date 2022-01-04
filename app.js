@@ -67,7 +67,7 @@ const sampleWorldData = {
             doors: [
                 {
                     position: [11, 23],
-                    destination: 'outdoors'
+                    destination: 'room0'
                 }
             ],
             bounds: [
@@ -78,8 +78,29 @@ const sampleWorldData = {
             ],
             dimensions: [25,  25]
         },
-        'outdoors': generateRoom('outdoors', 100, 100, 'lobby')
+        // 'outdoors': generateRoom('outdoors', 100, 100, 'lobby')
     }
+}
+
+let randomRooms = [];
+let roomsToGenerate = 15;
+
+for(let i = 0; i < roomsToGenerate; i++){
+    if(i == 0){
+        randomRooms.push(generateRoom(`room${i}`, 20, 20, 'lobby', [`room${i+1}`]));
+    }else{
+        let dList = [];
+        if(i < roomsToGenerate - 1){
+            for(let j = i; j < roomsToGenerate; j++){
+                dList.push(`room${j}`);
+            }
+        }
+        randomRooms.push(generateRoom(`room${i}`, 100, 100, `room${i-1}`, dList));
+    }
+}
+
+for(let i in randomRooms){
+    sampleWorldData.roomList[randomRooms[i].name] = randomRooms[i];
 }
 
 const sendWave = (senderID, recieverID)=>{

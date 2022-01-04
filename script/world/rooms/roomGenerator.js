@@ -70,6 +70,8 @@ const countNeighborhoodWalls = (coords, noiseMap, width, height)=>{
  */
 const generateRoom = (name, width, height, startDoorDestination, otherDoorDestinations)=>{
 
+    let doorList = [];
+
     //generates a noise map
     let noiseMap = [];    
     for(let i = 0; i < width * height; i++){
@@ -94,10 +96,16 @@ const generateRoom = (name, width, height, startDoorDestination, otherDoorDestin
         }
     }
 
+    for(let i in otherDoorDestinations){
+        let randomLocation = [Math.floor(Math.random() * (width - 1)), Math.floor(Math.random() * (height - 1))];
+        doorList.push({position: randomLocation, destination: otherDoorDestinations[i]});
+        tileMap[coordsToIndex(randomLocation, [width, height])] = tileDict.door;
+    }
+
     let startDoorPos = { x: Math.floor(width / 2), y: Math.floor(height / 2)};
     tileMap[coordsToIndex([startDoorPos.x, startDoorPos.y], [width, height])] = tileDict.door;
 
-    return new Room(name, startDoorPos, { rows: width, cols: height, tsize: tsize, tiles: tileMap }, [{ position: [startDoorPos.x, startDoorPos.y], destination: startDoorDestination}]);
+    return new Room(name, startDoorPos, { rows: width, cols: height, tsize: tsize, tiles: tileMap }, [{ position: [startDoorPos.x, startDoorPos.y], destination: startDoorDestination}, ...doorList]);
 }
 
 module.exports = generateRoom;

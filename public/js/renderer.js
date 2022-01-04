@@ -1,7 +1,7 @@
 
 const motionBlur = 1; //number between 0 and 1
 const textMargin = 3;
-const cameraPadding = 1;
+const cameraPadding = 5;
 
 class Renderer {
     constructor(canvas) {
