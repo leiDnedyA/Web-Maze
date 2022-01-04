@@ -1,7 +1,7 @@
 
-const motionBlur = .7; //number between 0 and 1
+const motionBlur = 1; //number between 0 and 1
 const textMargin = 3;
-const cameraPadding = 1;
+const cameraPadding = 5;
 
 class Renderer {
     constructor(canvas) {
@@ -13,6 +13,21 @@ class Renderer {
 
         this.canvas.width = 1600/2;
         this.canvas.height = 900/2;
+
+        //throwing the kitchen sink at the canvas image scaling problem VVV
+        this.canvas.style.cssText = 'image-rendering: optimizeSpeed;' + // FireFox < 6.0
+            'image-rendering: -moz-crisp-edges;' + // FireFox
+            'image-rendering: -o-crisp-edges;' +  // Opera
+            'image-rendering: -webkit-crisp-edges;' + // Chrome
+            'image-rendering: crisp-edges;' + // Chrome
+            'image-rendering: -webkit-optimize-contrast;' + // Safari
+            'image-rendering: pixelated; ' + // Future browsers
+            '-ms-interpolation-mode: nearest-neighbor;'; // IE
+
+        this.ctx.webkitImageSmoothingEnabled = false;
+        this.ctx.mozImageSmoothingEnabled = false;
+        this.ctx.msImageSmoothingEnabled = false;
+        this.ctx.imageSmoothingEnabled = false;
 
         this.unitSize = 30;
         this.textSize = 25;
@@ -52,6 +67,9 @@ class Renderer {
                 let sheetPos = this.tileMap.getTile(i, j);
 
                 let adjPos = this.relativePos(new Vector2(j, i));
+
+
+                let buffer = 1;
 
                 this.ctx.drawImage(this.tileMap.tileSheet, sheetPos.x, sheetPos.y, sheetPos.height, sheetPos.width, adjPos.x * this.unitSize, adjPos.y * this.unitSize, this.unitSize, this.unitSize);
             }

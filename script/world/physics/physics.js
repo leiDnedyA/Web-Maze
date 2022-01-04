@@ -111,7 +111,7 @@ class PhysicsEngine {
 
                 let potentialPos = new Vector2(round(currentPos.x + (this.entities[i].velocity.x / deltaTime), DP), round(currentPos.y + (this.entities[i].velocity.y / deltaTime), DP));
 
-                let collisionResult = this.collisionDetector.solveCollision(this.entities[i], potentialPos);
+                let collisionResult = this.collisionDetector.solveCollision(this.entities[i], potentialPos, currentPos);
 
                 this.entities[i].position = new Vector2(collisionResult.position.x, collisionResult.position.y);
                 if(collisionResult.collisionOccured.x){
