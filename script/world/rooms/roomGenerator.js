@@ -29,7 +29,7 @@ function range(start, end) {
  * @param {number} height 
  * @returns {boolean} true = wall, false = floor
  */
-const countNeighborhoodWalls = (coords, noiseMap, width, height)=>{
+const countNeighborhoodWalls = (coords, noiseMap, width, height, wallNum = 1)=>{
     let wallCount = 0;
     let xRange = range(coords[0] - 1, coords[0] + 1);
     let yRange = range(coords[1] - 1, coords[1] + 1);
@@ -44,16 +44,14 @@ const countNeighborhoodWalls = (coords, noiseMap, width, height)=>{
                 // console.log('match')
             }else{
 
-                if(noiseMap[coordsToIndex(tempCoords, [width, height])] == 1 || tempCoords[0] < 0 || tempCoords[1] < 0 || tempCoords[0] > width || tempCoords[1] > height){
+                if(noiseMap[coordsToIndex(tempCoords, [width, height])] == wallNum || tempCoords[0] < 0 || tempCoords[1] < 0 || tempCoords[0] > width || tempCoords[1] > height){
                     wallCount++;
                 }
             }
         }
     }
     // console.log(wallCount);
-    if(wallCount > 4){
-        return true;
-    }
+    return wallCount;
 
 }
 
@@ -90,7 +88,7 @@ const generateRoom = (name, width, height, startDoor, otherDoors)=>{
     let tileMap = [];
     for(let i = 0; i < width; i++){
         for(let j = 0; j < height; j++){
-            if(countNeighborhoodWalls([i, j], noiseMap, width, height)){
+            if(countNeighborhoodWalls([i, j], noiseMap, width, height) > 4){
                 tileMap.push(tileDict.wall);
             }else{
                 tileMap.push(tileDict.floor);
@@ -100,7 +98,39 @@ const generateRoom = (name, width, height, startDoor, otherDoors)=>{
 
     for(let i in doorList){
         if(doorList[i].hasOwnProperty(name)){
-            tileMap[coordsToIndex([doorList[i][name][0], doorList[i][name][1]], [width, height])] = tileDict.door;
+            let coords = [doorList[i][name][0], doorList[i][name][1]];
+            let index = coordsToIndex(coords, [width, height]);
+
+            let maxDoorWallNeighbors = 4;
+
+            //check if door is too enclosed
+            let tries = 0;
+            let neighborWallCount = countNeighborhoodWalls(coords, tileMap, width, height, tileDict.wall);
+            while (neighborWallCount > maxDoorWallNeighbors && tries < 10){
+
+                let xRange = range(coords[0] - 1, coords[0] + 1);
+                let yRange = range(coords[1] - 1, coords[1] + 1);
+
+                for (let j in xRange) {
+                    for (let k in yRange) {
+                        let tempCoords = [xRange[j], yRange[k]];
+                        if (tempCoords[0] == coords[0] && tempCoords[1] == coords[1]) {
+
+                        } else {
+                            let tempIndex = coordsToIndex(tempCoords, [width, height]);
+                            if(tempIndex >= 0){
+                                if(tileMap[tempIndex] != tileDict.door){
+                                    tileMap[tempIndex] = tileDict.floor;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                tries++;
+
+            }
+            tileMap[coordsToIndex(coords, [width, height])] = tileDict.door;
         }
     }
 
