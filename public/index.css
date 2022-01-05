@@ -72,7 +72,7 @@ table{
 }
 
 #chatForm{
-    margin: 10px 0 0 0;
+    margin: 0 0 0 0;
 }
 
 #chatBox{
@@ -88,6 +88,12 @@ table{
 
 #gameCanvas {
     border: 1px solid black;
+    display: none;
+}
+
+#roomLabel {
+    color: #666;
+    margin: 3px;
     display: none;
 }
 

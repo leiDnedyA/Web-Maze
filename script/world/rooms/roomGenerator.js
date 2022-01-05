@@ -64,13 +64,15 @@ const countNeighborhoodWalls = (coords, noiseMap, width, height)=>{
  * @param {string} name name of room
  * @param {number} width width of room
  * @param {number} height height of room
- * @param {string} doorDestination destination of door in room
- * @param {string[]} otherDoorDestinations list of destinations for other doors
+ * @param {{roomname: position, roomname: poistion}} startDoor door that leads from previous room to this room
+ * @param {Array<{roomname: position, roomname: poistion}>} otherDoors doors that lead from this room to other rooms
  * @returns {Room} generated room
  */
-const generateRoom = (name, width, height, startDoorDestination, otherDoorDestinations)=>{
+const generateRoom = (name, width, height, startDoor, otherDoors)=>{
 
-    let doorList = [];
+    let doorList = [startDoor, ...otherDoors];
+
+    // console.log(doorList)
 
     //generates a noise map
     let noiseMap = [];    
@@ -96,16 +98,17 @@ const generateRoom = (name, width, height, startDoorDestination, otherDoorDestin
         }
     }
 
-    for(let i in otherDoorDestinations){
-        let randomLocation = [Math.floor(Math.random() * (width - 1)), Math.floor(Math.random() * (height - 1))];
-        doorList.push({position: randomLocation, destination: otherDoorDestinations[i]});
-        tileMap[coordsToIndex(randomLocation, [width, height])] = tileDict.door;
+    for(let i in doorList){
+        if(doorList[i].hasOwnProperty(name)){
+            tileMap[coordsToIndex([doorList[i][name][0], doorList[i][name][1]], [width, height])] = tileDict.door;
+        }
     }
 
-    let startDoorPos = { x: Math.floor(width / 2), y: Math.floor(height / 2)};
-    tileMap[coordsToIndex([startDoorPos.x, startDoorPos.y], [width, height])] = tileDict.door;
+    let startDoorPos = [0, 0]
 
-    return new Room(name, startDoorPos, { rows: width, cols: height, tsize: tsize, tiles: tileMap }, [{ position: [startDoorPos.x, startDoorPos.y], destination: startDoorDestination}, ...doorList]);
+    // console.log(doorList)
+
+    return new Room(name, startDoorPos, { rows: width, cols: height, tsize: tsize, tiles: tileMap }, doorList);
 }
 
 module.exports = generateRoom;

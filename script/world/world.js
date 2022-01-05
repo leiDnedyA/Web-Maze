@@ -104,9 +104,9 @@ class World {
         this.minigameHandler.newMinigame(participants, "drawing"); //eventually change 'drawing' to show the gamemode requested by the players
     }
 
-    changeClientRoom(client, roomName){
+    changeClientRoom(client, roomName, startCoords){
         client.setRoom(roomName, this.worldData.roomList[roomName]);
-        this.physicsEngine.entities[client.id].setRoom(roomName, this.rooms[roomName].startPos);
+        this.physicsEngine.entities[client.id].setRoom(roomName, { x: startCoords[0], y: startCoords[1]});
     }
 
     removeEntity(id){

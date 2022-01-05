@@ -26,6 +26,30 @@ const tickSpeed = 60;
 const chatChatLimit = 240;
 const xssFilter = /<(.*)>/;
 
+const randomRoomDimensions = [50, 50];
+
+const usedDoorPositions = [];
+const randomDoorPos = (dimensions)=>{
+    let pos;
+    let match = false;
+
+    do{
+        pos = [Math.floor(Math.random() * (dimensions[0] - 1)), Math.floor(Math.random() * (dimensions[1] - 1))];
+        for(let i in usedDoorPositions){
+            if(usedDoorPositions[i][0] === pos[0] && usedDoorPositions[i][1] === pos[1]){
+                match = true;
+            }
+        }
+    }while(match)
+
+    return pos;
+}
+
+const lobbyStartDoor = {
+    'lobby': [11, 23],
+    'level0': randomDoorPos(randomRoomDimensions)
+}
+
 const sampleWorldData = {
     startRoom: "lobby",
     roomList: {
@@ -65,10 +89,7 @@ const sampleWorldData = {
                 ]
             },
             doors: [
-                {
-                    position: [11, 23],
-                    destination: 'room0'
-                }
+                lobbyStartDoor
             ],
             bounds: [
                 [1, 1],
@@ -85,17 +106,28 @@ const sampleWorldData = {
 let randomRooms = [];
 let roomsToGenerate = 15;
 
+let doorsPerRoom = 3; //gets multiplied by 2
+let doorList = [] //index is first entrance index
+
+
 for(let i = 0; i < roomsToGenerate; i++){
-    if(i == 0){
-        randomRooms.push(generateRoom(`room${i}`, 20, 20, 'lobby', [`room${i+1}`]));
+
+    let roomName = `level${i}`;
+    let nextDoor = {};
+    nextDoor[roomName] = randomDoorPos(randomRoomDimensions);
+    
+    if(i !== roomsToGenerate - 1){
+        nextDoor[`level${i + 1}`] = randomDoorPos(randomRoomDimensions);
     }else{
-        let dList = [];
-        if(i < roomsToGenerate - 1){
-            for(let j = i; j < roomsToGenerate; j++){
-                dList.push(`room${j}`);
-            }
-        }
-        randomRooms.push(generateRoom(`room${i}`, 100, 100, `room${i-1}`, dList));
+        nextDoor[`lobby`] = [11, 23];
+    }
+    
+    doorList.push(nextDoor);
+    if(i == 0){
+        randomRooms.push(generateRoom(roomName, randomRoomDimensions[0], randomRoomDimensions[1], lobbyStartDoor, [nextDoor]));
+    }
+    else{
+        randomRooms.push(generateRoom(roomName, randomRoomDimensions[0], randomRoomDimensions[1], doorList[i-1], [nextDoor]));
     }
 }
 

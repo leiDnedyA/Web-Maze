@@ -74,7 +74,7 @@ class Client {
 
     setRoom(roomName, data){
         this.room = roomName;
-        this.socket.emit('roomUpdate', {tileMap: data.tileMap});
+        this.socket.emit('roomUpdate', {name: roomName, tileMap: data.tileMap});
         this.lastRoomSwitch = Date.now();
     }
 
