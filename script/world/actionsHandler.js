@@ -22,13 +22,26 @@ class ActionsHandler{
             let player = clientList[i].getPlayer();
             if (player.charController.keysDown[' ']){
                 if (Date.now() - clientList[i].lastRoomSwitch > roomSwitchDelay * 1000){ //puts delay on time between room switches
-                    for (let j in worldData.roomList[clientList[i].room].doors) {
+                    let room = worldData.roomList[clientList[i].room];
+                    for (let j in room.doors) {
 
-                        let door = worldData.roomList[clientList[i].room].doors[j];
+                        let door = room.doors[j];
+
+                        //door[key] = [x, y] of door's entrance in room "key"
 
                         if(door){
-                            if (Math.abs(player.position.x - (door.position[0])) < 1 && Math.abs(player.position.y - (door.position[1])) < 1) {
-                                this.world.changeClientRoom(clientList[i], door.destination);
+                            if(door.hasOwnProperty(room.name)){
+                                let entrances = Object.keys(door);
+                                let destination = '';
+                                for(let j in entrances){
+                                    if(entrances[j] !== room.name){
+                                        destination = entrances[j];
+                                    }
+                                }
+
+                                if (Math.abs(player.position.x - (door[room.name][0])) < 1 && Math.abs(player.position.y - (door[room.name][1])) < 1) {
+                                    this.world.changeClientRoom(clientList[i], destination, door[destination]);
+                                }
                             }
                         }
                     }

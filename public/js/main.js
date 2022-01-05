@@ -9,6 +9,7 @@ const chatBoxDiv = document.querySelector('#chatBox');
 const usernameInput = document.querySelector("#usernameInput");
 const loadingText = document.createElement("h2");
 const mainPageDiv = document.querySelector("#mainPageDiv");
+const roomLabel = document.querySelector("#roomLabel");
 
 loadingText.innerHTML = "loading...";
 
@@ -91,6 +92,7 @@ const startGame = ()=>{
     canvasController.setContextMenuOptions(contextMenuOptions);
     loadingText.style.display = 'none';
     startCanvas();
+    roomLabel.style.display = 'block';
     charController.start();
     engine.start();
     chat.start();
@@ -129,6 +131,7 @@ loginForm.addEventListener('submit', (e) => {
         minigameController.init(clientID);
     })
     socket.on("roomUpdate", (data) => {
+        roomLabel.innerHTML = `Current room: ${data.name}`;
         renderer.setTileMap(data.tileMap);
     })
     socket.on('assets', (data) => {
