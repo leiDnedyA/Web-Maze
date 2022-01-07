@@ -32,8 +32,15 @@ class Renderer {
         this.unitSize = 30;
         this.textSize = 25;
 
+        this.canvasSizeUnits = [this.canvas.width / this.unitSize, this.canvas.height / this.unitSize];
+
         this.cameraOffset = new Vector2(0, 0);
         this.cameraTarget = null;
+
+        this.adjustedTileMap = {
+            offset: [0, 0],
+            croppedMap: null
+        };
 
         this.render = this.render.bind(this);
         this.adjustCamera = this.adjustCamera.bind(this);
@@ -44,6 +51,7 @@ class Renderer {
         this.setTileMap = this.setTileMap.bind(this);
         this.setTileSheetSRC = this.setTileSheetSRC.bind(this);
         this.relativePos = this.relativePos.bind(this);
+        this.adjustTileMap = this.adjustTileMap.bind(this);
 
     }
 
@@ -62,17 +70,38 @@ class Renderer {
     }
 
     renderTiles() {
-        for (let i = 0; i < this.tileMap.rows; i++) {
-            for (let j = 0; j < this.tileMap.cols; j++) {
-                let sheetPos = this.tileMap.getTile(i, j);
 
-                let adjPos = this.relativePos(new Vector2(j, i));
+        // old way of rendering
+        // for (let i = 0; i < this.tileMap.rows; i++) {
+        //     for (let j = 0; j < this.tileMap.cols; j++) {
 
+        //         let adjPos = this.relativePos(new Vector2(j, i));
+                
+        //         let sheetPos = this.tileMap.getTile(i, j);
+        //         this.ctx.drawImage(this.tileMap.tileSheet, sheetPos.x, sheetPos.y, sheetPos.height, sheetPos.width, adjPos.x * this.unitSize, adjPos.y * this.unitSize, this.unitSize, this.unitSize);
+        //     }
+        // }
 
-                let buffer = 1;
+        let testMap = this.adjustedTileMap;
 
-                this.ctx.drawImage(this.tileMap.tileSheet, sheetPos.x, sheetPos.y, sheetPos.height, sheetPos.width, adjPos.x * this.unitSize, adjPos.y * this.unitSize, this.unitSize, this.unitSize);
+        let offset = [this.cameraOffset.x - Math.floor(this.cameraOffset.x), this.cameraOffset.y - Math.floor(this.cameraOffset.y)];
+
+        //optimized rendering
+        for (let i = 0; i < testMap.cols; i++){
+            // let row = '';
+            for(let j = 0; j < testMap.rows; j++){
+                let t = testMap.tiles[i * (testMap.rows) + j];
+                let args = [(i - offset[0]) * this.unitSize, (j - offset[1]) * this.unitSize, this.unitSize, this.unitSize];
+                if(t == -1){
+                    this.ctx.fillStyle = "black";
+                    this.ctx.fillRect(...args);
+                    // row += '-';
+                } else {
+                    let sheetPos = this.tileMap.getTileFromSheet(t);
+                    this.ctx.drawImage(this.tileMap.tileSheet, sheetPos.x, sheetPos.y, sheetPos.height, sheetPos.width, ...args);
+                }
             }
+            // console.log(row + i)
         }
     }
 
@@ -114,9 +143,61 @@ class Renderer {
 
     setTileMap(tileMap) {
         this.tileMap = new TileMap(tileMap, this.tileSheet);
+        this.adjustTileMap();
+    }
+
+
+    /**
+     * Adjusts the cropped version of this.tileMap and stores it in this.adjustedTileMap
+     * to optimize rendering.
+     */
+    adjustTileMap(){ //should be called every time camera is adjusted
+
+        let getIndexFromCoords = (coords, dimensions)=>{
+            for(let i in coords){
+                if(coords[i] < 0 || coords[i] >= dimensions[i]){
+                    return null;
+                }
+            }
+            return (parseInt(dimensions[0]) * parseInt(coords[1]) + parseInt(coords[0]));
+        }
+
+        let offset = [Math.floor(this.cameraOffset.x), Math.floor(this.cameraOffset.y)];
+        this.adjustedTileMap.offset = offset;
+        let dimensions = [Math.ceil(this.canvasSizeUnits[0]) + 3, Math.ceil(this.canvasSizeUnits[1]) + 3];
+
+        // console.log(dimensions);
+
+        
+        let adjTiles = [];
+
+        // console.log(offset);
+        for(let i = 0; i < dimensions[0]; i++){
+            for(let j = 0; j < dimensions[1]; j++){
+                let index = getIndexFromCoords([i + offset[0], j + offset[1]], [this.tileMap.cols, this.tileMap.rows]);
+                let t = this.tileMap.tiles[index];
+                if(index !== NaN && t){
+                    adjTiles.push(t);
+                }else{
+                    adjTiles.push(-1);
+                }     
+            }
+        }
+        
+        let map = {
+            cols: dimensions[0],
+            rows: dimensions[1],
+            tsize: this.tileMap.tsize,
+            tiles: adjTiles
+        };
+        // console.log(adjTiles)
+        this.adjustedTileMap = new TileMap(map, this.tileMap.tileSheet);
+
     }
 
     adjustCamera(gameObjects) {
+
+        let cameraChanged = false;
 
         for (let i in gameObjects) {
             if (gameObjects[i].id == this.cameraTarget) {
@@ -125,18 +206,25 @@ class Renderer {
 
                 if (gameObjects[i].position.x - cameraPadding < this.cameraOffset.x) {
                     this.cameraOffset.setX(gameObjects[i].position.x - cameraPadding)
+                    cameraChanged = true;
                 } else if ((gameObjects[i].position.x + 1 + cameraPadding) > (this.cameraOffset.x + (this.canvas.width / this.unitSize))) {
                     this.cameraOffset.setX(gameObjects[i].position.x - (this.canvas.width / this.unitSize) + 1 + cameraPadding);
+                    cameraChanged = true;
                 }
 
                 //y axis
                 if (gameObjects[i].position.y - cameraPadding < this.cameraOffset.y) {
                     this.cameraOffset.setY(gameObjects[i].position.y - cameraPadding)
+                    cameraChanged = true;
                 } else if ((gameObjects[i].position.y + 1 + cameraPadding) > (this.cameraOffset.y + (this.canvas.height / this.unitSize))) {
                     this.cameraOffset.setY(gameObjects[i].position.y - (this.canvas.height / this.unitSize) + 1 + cameraPadding);
+                    cameraChanged = true;
                 }
 
 
+            }
+            if(cameraChanged){
+                this.adjustTileMap();
             }
         }
     }
