@@ -10,8 +10,10 @@ const usernameInput = document.querySelector("#usernameInput");
 const loadingText = document.createElement("h2");
 const mainPageDiv = document.querySelector("#mainPageDiv");
 const roomLabel = document.querySelector("#roomLabel");
+const controlsButton = document.querySelector("#controlsButton");
 
 loadingText.innerHTML = "loading...";
+const helpMessage = 'CONTROLS: WASD or ARROW KEYS to move, SPACE to enter a door, CLICK on players to interact.\n Make sure that the GAME WINDOW is selected to move around.';
 
 var worldTableElement = null;
 var clientID = null;
@@ -98,6 +100,10 @@ const startGame = ()=>{
     chat.start();
     chatBox.start();
     battleRequestHandler.start();
+    controlsButton.style.visibility = 'visible';
+    controlsButton.addEventListener('click', ()=>{
+        alert(helpMessage);
+    })
 }
 
 const awaitJoinWorld = () => { // figure out how to do async await and do it here

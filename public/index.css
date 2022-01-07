@@ -109,6 +109,14 @@ table{
     display: none;
 }
 
+#controlsButton {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    visibility: hidden;
+    font-size: 20px;
+}
+
 #battleRequestNotificationButtons {
     margin: 5px;
 }
