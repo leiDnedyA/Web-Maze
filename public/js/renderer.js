@@ -52,6 +52,7 @@ class Renderer {
         this.setTileSheetSRC = this.setTileSheetSRC.bind(this);
         this.relativePos = this.relativePos.bind(this);
         this.adjustTileMap = this.adjustTileMap.bind(this);
+        this.checkWorldPosOnscreen = this.checkWorldPosOnscreen.bind(this);
 
     }
 
@@ -109,10 +110,16 @@ class Renderer {
         for (let i in gameObjects) {
             this.ctx.fillStyle = 'red';
 
-            let adjPos = this.relativePos(gameObjects[i].position)
 
-            this.ctx.fillRect(adjPos.x * this.unitSize, adjPos.y * this.unitSize, this.unitSize, this.unitSize);
-            this.renderNametag(gameObjects[i]);
+            if(this.checkWorldPosOnscreen(gameObjects[i].position)){
+                let adjPos = this.relativePos(gameObjects[i].position);
+                this.ctx.fillRect(adjPos.x * this.unitSize, adjPos.y * this.unitSize, this.unitSize, this.unitSize);
+                this.renderNametag(gameObjects[i]);
+            }
+
+            
+
+            
         }
     }
 
@@ -131,11 +138,12 @@ class Renderer {
         for(let i in chats){
             for(let j in gameObjects){
                 if(gameObjects[j].id == chats[i].senderID){
-                    let adjPos = this.relativePos(gameObjects[j].position);
-                    this.ctx.fillStyle = 'white';
+                    if(this.checkWorldPosOnscreen(gameObjects[j].position)){
+                        let adjPos = this.relativePos(gameObjects[j].position);
+                        this.ctx.fillStyle = 'white';
 
-                    this.ctx.fillText(chats[i].message, adjPos.x * this.unitSize, (adjPos.y - 1) * this.unitSize);
-
+                        this.ctx.fillText(chats[i].message, adjPos.x * this.unitSize, (adjPos.y - 1) * this.unitSize);
+                    }
                 }
             }
         }
@@ -227,6 +235,24 @@ class Renderer {
                 this.adjustTileMap();
             }
         }
+    }
+
+    /**
+     * Checks if a world position is visible within the bounds of the canvas.
+     * 
+     * @param {Vector2} pos worldPos
+     * @returns {boolean} true --> visible on screen, false --> not visible on screen
+     */
+    checkWorldPosOnscreen(pos){
+
+        let adjPos = this.relativePos(pos);
+        adjPos.setX(adjPos.x * this.unitSize);
+        adjPos.setY(adjPos.y * this.unitSize);
+
+        if(adjPos.x < 0 || adjPos.x > this.canvas.width || adjPos.y < 0 || adjPos.y > this.canvas.height){
+            return false;
+        }
+        return true;
     }
 
     relativePos(pos) { //adjusts a world pos based on factors like the camera offset
