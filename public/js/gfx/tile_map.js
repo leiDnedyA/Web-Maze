@@ -10,14 +10,18 @@ class TileMap {
 
 
         this.getTile = this.getTile.bind(this);
+        this.getTileIndex = this.getTileIndex.bind(this);
         this.getTileFromSheet = this.getTileFromSheet.bind(this);
         this.setTileSheet = this.setTileSheet.bind(this);
     }
 
-    getTile(row, col) {
-        let index = this.tiles[row * this.cols + col];
+    getTileIndex(row, col) {
+        return this.tiles[row * this.cols + col];
+    }
 
-        return this.getTileFromSheet(index);
+    getTile(row, col) {
+        
+        return this.getTileFromSheet(this.getTileIndex(row, col));
     }
 
     getTileFromSheet(i) {

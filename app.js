@@ -26,7 +26,9 @@ const tickSpeed = 60;
 const chatChatLimit = 240;
 const xssFilter = /<(.*)>/;
 
-const randomRoomDimensions = [50, 50];
+//change these for tests
+const randomRoomDimensions = [100, 100]; //[100, 100] by default
+const wallFrequency = .45; //.45 by default
 
 const usedDoorPositions = [];
 const randomDoorPos = (dimensions)=>{
@@ -124,10 +126,10 @@ for(let i = 0; i < roomsToGenerate; i++){
     
     doorList.push(nextDoor);
     if(i == 0){
-        randomRooms.push(generateRoom(roomName, randomRoomDimensions[0], randomRoomDimensions[1], lobbyStartDoor, [nextDoor]));
+        randomRooms.push(generateRoom(roomName, randomRoomDimensions[0], randomRoomDimensions[1], lobbyStartDoor, [nextDoor], wallFrequency));
     }
     else{
-        randomRooms.push(generateRoom(roomName, randomRoomDimensions[0], randomRoomDimensions[1], doorList[i-1], [nextDoor]));
+        randomRooms.push(generateRoom(roomName, randomRoomDimensions[0], randomRoomDimensions[1], doorList[i - 1], [nextDoor], wallFrequency));
     }
 }
 
