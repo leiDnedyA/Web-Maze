@@ -64,9 +64,10 @@ const countNeighborhoodWalls = (coords, noiseMap, width, height, wallNum = 1)=>{
  * @param {number} height height of room
  * @param {{roomname: position, roomname: poistion}} startDoor door that leads from previous room to this room
  * @param {Array<{roomname: position, roomname: poistion}>} otherDoors doors that lead from this room to other rooms
+ * @param {number} wallFrequency percentage of tiles to be made walls, .45 by default
  * @returns {Room} generated room
  */
-const generateRoom = (name, width, height, startDoor, otherDoors)=>{
+const generateRoom = (name, width, height, startDoor, otherDoors, wallFrequency = .45)=>{
 
     let doorList = [startDoor, ...otherDoors];
 
@@ -75,7 +76,7 @@ const generateRoom = (name, width, height, startDoor, otherDoors)=>{
     //generates a noise map
     let noiseMap = [];    
     for(let i = 0; i < width * height; i++){
-        if (Math.random() >= .45){
+        if (Math.random() >= wallFrequency){
             noiseMap.push(0);
         }else{
             noiseMap.push(1);
