@@ -21,6 +21,13 @@ class CharController {
 
     setInput(data){
         this.keysDown = data;
+        let moving = false;
+        for(let i in this.keysDown){
+            if(this.keysDown[i] && i !== ' '){
+                moving = true;
+            }
+        }
+        this.player.isMoving = moving;
     }
 
 }

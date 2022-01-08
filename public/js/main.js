@@ -19,7 +19,7 @@ var worldTableElement = null;
 var clientID = null;
 
 const updateFunc = (deltaTime) => {
-    renderer.render(world.getGameObjects(), chat.getChats());
+    renderer.render(world.getGameObjects(), world.animationObjects, chat.getChats(), deltaTime);
     chat.update();
     socket.emit('inputData', charController.getKeysDown());
     canvasController.setCameraOffset(renderer.cameraOffset);

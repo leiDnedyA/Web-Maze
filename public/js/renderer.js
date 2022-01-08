@@ -5,8 +5,16 @@ const cameraPadding = 5;
 const backgroundColor = '#000210';
 const textColor = '#db2e2e';
 
-const playerTile = 0;
+const playerTiles = {
+    'static': 0,
+    0: 6,
+    1: 7
+};
 const backgroundTile = 1;
+
+const animationFPS = 15;
+
+const playerIsMoving = true;
 
 class Renderer {
     constructor(canvas) {
@@ -18,6 +26,8 @@ class Renderer {
 
         this.canvas.width = 1600/2;
         this.canvas.height = 900/2;
+
+        this.deltaTimeAccumulator = 0;
 
         //throwing the kitchen sink at the canvas image scaling problem VVV
         this.canvas.style.cssText = 'image-rendering: optimizeSpeed;' + // FireFox < 6.0
@@ -61,7 +71,7 @@ class Renderer {
 
     }
 
-    render(gameObjects, chats) {
+    render(gameObjects, animationObjects, chats, deltaTime) {
 
         //pre-rendering tasks
         this.adjustCamera(gameObjects);
@@ -71,7 +81,7 @@ class Renderer {
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
         this.renderTiles();
-        this.renderGameObjects(gameObjects);
+        this.renderGameObjects(gameObjects, animationObjects, deltaTime);
         this.renderChats(chats, gameObjects);
     }
 
@@ -111,16 +121,33 @@ class Renderer {
         }
     }
 
-    renderGameObjects(gameObjects) {
+    renderGameObjects(gameObjects, animationObjects, deltaTime) {
         for (let i in gameObjects) {
             this.ctx.fillStyle = 'red';
 
 
             if(this.checkWorldPosOnscreen(gameObjects[i].position)){
                 let adjPos = this.relativePos(gameObjects[i].position);
-                let sheetPos = this.tileMap.getTileFromSheet(playerTile);
-                this.ctx.drawImage(this.tileMap.tileSheet, sheetPos.x, sheetPos.y, sheetPos.height, sheetPos.width, adjPos.x * this.unitSize, adjPos.y * this.unitSize, this.unitSize, this.unitSize);
+                let sheetPos;
+                
+                if(gameObjects[i].isMoving){
+                    let a = animationObjects[gameObjects[i].id];
+                    a.tAccumulator += 1;
+                    if(a.tAccumulator >= 5){
+                        a.tAccumulator = 0;
+                        if(a.frame === 0){
+                            a.frame = 1;
+                        }else{
+                            a.frame = 0;
+                        }
+                    }
+                    sheetPos = this.tileMap.getTileFromSheet(playerTiles[a.frame]);
+                }else{
+                    sheetPos = this.tileMap.getTileFromSheet(playerTiles.static);
+                }
 
+                this.ctx.drawImage(this.tileMap.tileSheet, sheetPos.x, sheetPos.y, sheetPos.height, sheetPos.width, adjPos.x * this.unitSize, adjPos.y * this.unitSize, this.unitSize, this.unitSize);
+                
                 // this.ctx.fillRect(adjPos.x * this.unitSize, adjPos.y * this.unitSize, this.unitSize, this.unitSize);
                 this.renderNametag(gameObjects[i]);
             }

@@ -8,6 +8,7 @@ class Entity extends PhysicsObject{
         super(position);
         this.id = id;
         this.name = name;
+        this.isMoving = false;
 
         this.setRoom = this.setRoom.bind(this);
     }
