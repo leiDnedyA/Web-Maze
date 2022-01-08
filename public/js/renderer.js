@@ -1,7 +1,12 @@
 
-const motionBlur = 1; //number between 0 and 1
+const motionBlur = .8; //number between 0 and 1
 const textMargin = 3;
 const cameraPadding = 5;
+const backgroundColor = '#000210';
+const textColor = '#db2e2e';
+
+const playerTile = 0;
+const backgroundTile = 1;
 
 class Renderer {
     constructor(canvas) {
@@ -89,20 +94,20 @@ class Renderer {
 
         //optimized rendering
         for (let i = 0; i < testMap.cols; i++){
-            // let row = '';
             for(let j = 0; j < testMap.rows; j++){
                 let t = testMap.tiles[i * (testMap.rows) + j];
                 let args = [(i - offset[0]) * this.unitSize, (j - offset[1]) * this.unitSize, this.unitSize, this.unitSize];
                 if(t == -1){
-                    this.ctx.fillStyle = "black";
-                    this.ctx.fillRect(...args);
-                    // row += '-';
+                    this.ctx.fillStyle = backgroundColor;
+                    // this.ctx.fillRect(...args);
+
+                    let sheetPos = this.tileMap.getTileFromSheet(backgroundTile);
+                    this.ctx.drawImage(this.tileMap.tileSheet, sheetPos.x, sheetPos.y, sheetPos.height, sheetPos.width, ...args);
                 } else {
                     let sheetPos = this.tileMap.getTileFromSheet(t);
                     this.ctx.drawImage(this.tileMap.tileSheet, sheetPos.x, sheetPos.y, sheetPos.height, sheetPos.width, ...args);
                 }
             }
-            // console.log(row + i)
         }
     }
 
@@ -113,7 +118,10 @@ class Renderer {
 
             if(this.checkWorldPosOnscreen(gameObjects[i].position)){
                 let adjPos = this.relativePos(gameObjects[i].position);
-                this.ctx.fillRect(adjPos.x * this.unitSize, adjPos.y * this.unitSize, this.unitSize, this.unitSize);
+                let sheetPos = this.tileMap.getTileFromSheet(playerTile);
+                this.ctx.drawImage(this.tileMap.tileSheet, sheetPos.x, sheetPos.y, sheetPos.height, sheetPos.width, adjPos.x * this.unitSize, adjPos.y * this.unitSize, this.unitSize, this.unitSize);
+
+                // this.ctx.fillRect(adjPos.x * this.unitSize, adjPos.y * this.unitSize, this.unitSize, this.unitSize);
                 this.renderNametag(gameObjects[i]);
             }
 

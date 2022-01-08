@@ -1,7 +1,7 @@
 
 const Room = require('./room.js');
 
-const tileDict = {'floor': 1, 'wall': 2, 'door': 5};
+const tileDict = {'floor': 2, 'wall': 1, 'specialWall': 3,'door': 5};
 const tsize = 16;
 
 /**
@@ -89,10 +89,19 @@ const generateRoom = (name, width, height, startDoor, otherDoors, wallFrequency 
     let tileMap = [];
     for(let i = 0; i < width; i++){
         for(let j = 0; j < height; j++){
-            if(countNeighborhoodWalls([i, j], noiseMap, width, height) > 4){
+            let w = countNeighborhoodWalls([i, j], noiseMap, width, height);
+            if(w > 4){
                 tileMap.push(tileDict.wall);
             }else{
                 tileMap.push(tileDict.floor);
+            }
+        }
+    }
+
+    for(let i in tileMap){
+        if(tileMap[i] === tileDict.wall){
+            if(Math.random() < .1){
+                tileMap[i] = tileDict.specialWall;
             }
         }
     }

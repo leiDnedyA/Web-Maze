@@ -1,8 +1,9 @@
 const pointInPolygon = require('point-in-polygon');
 
 const tileIsWall = {
-    1: false,
-    2: true,
+    1: true,
+    2: false,
+    3: true,
     5: false
 }
 
