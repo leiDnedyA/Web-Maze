@@ -123,10 +123,10 @@ const sendWave = (senderID, recieverID)=>{
 }
 
 //world setup
-const testWorld = new World('Test World', 420, tickSpeed, sampleWorldData);
+const testWorld = new World('Labyrinth', 60, tickSpeed, sampleWorldData);
 worldList.push(testWorld);
 
-const world2 = new World('world2', 3, tickSpeed, sampleWorldData);
+const world2 = new World('Test World', 10, tickSpeed, sampleWorldData);
 worldList.push(world2);
 
 //engine setup

@@ -1,7 +1,6 @@
 
-const motionBlur = .8; //number between 0 and 1
+const motionBlur = 1; //number between 0 and 1
 const textMargin = 3;
-const cameraPadding = 5;
 const backgroundColor = '#000210';
 const textColor = '#db2e2e';
 
@@ -24,8 +23,12 @@ class Renderer {
         this.tileSheet = new Image();
         this.tileMap = null;
 
-        this.canvas.width = 1600/2;
-        this.canvas.height = 900/2;
+        this.windowStarted = false;
+
+        this.cameraPadding;
+
+        this.handleResize = this.handleResize.bind(this);
+        this.handleResize();
 
         this.deltaTimeAccumulator = 0;
 
@@ -44,11 +47,6 @@ class Renderer {
         this.ctx.msImageSmoothingEnabled = false;
         this.ctx.imageSmoothingEnabled = false;
 
-        this.unitSize = 30;
-        this.textSize = 25;
-
-        this.canvasSizeUnits = [this.canvas.width / this.unitSize, this.canvas.height / this.unitSize];
-
         this.cameraOffset = new Vector2(0, 0);
         this.cameraTarget = null;
 
@@ -56,6 +54,8 @@ class Renderer {
             offset: [0, 0],
             croppedMap: null
         };
+
+        window.addEventListener('resize', this.handleResize);
 
         this.render = this.render.bind(this);
         this.adjustCamera = this.adjustCamera.bind(this);
@@ -76,6 +76,8 @@ class Renderer {
         //pre-rendering tasks
         this.adjustCamera(gameObjects);
 
+        this.lastGameObjects = gameObjects;
+
         //clear the canvas
         this.ctx.fillStyle = `rgba(0, 0, 0, ${motionBlur})`
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
@@ -83,6 +85,32 @@ class Renderer {
         this.renderTiles();
         this.renderGameObjects(gameObjects, animationObjects, deltaTime);
         this.renderChats(chats, gameObjects);
+    }
+
+    handleResize(){
+        this.canvas.width = window.innerWidth;
+        this.canvas.height = window.innerHeight * .75;
+
+        this.unitSize = 30;
+        this.textSize = this.unitSize * 25/30;
+        
+        let minDimension = (this.canvas.width > this.canvas.height) ? this.canvas.height : this.canvas.width;
+
+        this.cameraPadding = 10 / 1080 * minDimension;
+
+        this.canvasSizeUnits = [this.canvas.width / this.unitSize, this.canvas.height / this.unitSize];
+
+        this.ctx.webkitImageSmoothingEnabled = false;
+        this.ctx.mozImageSmoothingEnabled = false;
+        this.ctx.msImageSmoothingEnabled = false;
+        this.ctx.imageSmoothingEnabled = false;
+
+        if(!this.windowStarted){
+            this.windowStarted = true;
+        }else{
+            this.adjustTileMap();
+        }
+
     }
 
     renderTiles() {
@@ -129,10 +157,16 @@ class Renderer {
             if(this.checkWorldPosOnscreen(gameObjects[i].position)){
                 let adjPos = this.relativePos(gameObjects[i].position);
                 let sheetPos;
-                
-                if(gameObjects[i].isMoving){
+                let minPlayerSpeed = .01;
+                let speed = { x: Math.abs(gameObjects[i].velocity.x), y: Math.abs(gameObjects[i].velocity.y)}
+
+                if (gameObjects[i].isMoving && (speed.x > minPlayerSpeed || speed.y > minPlayerSpeed)){
+                    
                     let a = animationObjects[gameObjects[i].id];
-                    a.tAccumulator += 1;
+
+                    let maxV = ((speed.x > speed.y) ? speed.x : speed.y);
+
+                    a.tAccumulator += maxV / 4;
                     if(a.tAccumulator >= 5){
                         a.tAccumulator = 0;
                         if(a.frame === 0){
@@ -247,20 +281,20 @@ class Renderer {
 
                 //x axis
 
-                if (gameObjects[i].position.x - cameraPadding < this.cameraOffset.x) {
-                    this.cameraOffset.setX(gameObjects[i].position.x - cameraPadding)
+                if (gameObjects[i].position.x - this.cameraPadding < this.cameraOffset.x) {
+                    this.cameraOffset.setX(gameObjects[i].position.x - this.cameraPadding)
                     cameraChanged = true;
-                } else if ((gameObjects[i].position.x + 1 + cameraPadding) > (this.cameraOffset.x + (this.canvas.width / this.unitSize))) {
-                    this.cameraOffset.setX(gameObjects[i].position.x - (this.canvas.width / this.unitSize) + 1 + cameraPadding);
+                } else if ((gameObjects[i].position.x + 1 + this.cameraPadding) > (this.cameraOffset.x + (this.canvas.width / this.unitSize))) {
+                    this.cameraOffset.setX(gameObjects[i].position.x - (this.canvas.width / this.unitSize) + 1 + this.cameraPadding);
                     cameraChanged = true;
                 }
 
                 //y axis
-                if (gameObjects[i].position.y - cameraPadding < this.cameraOffset.y) {
-                    this.cameraOffset.setY(gameObjects[i].position.y - cameraPadding)
+                if (gameObjects[i].position.y - this.cameraPadding < this.cameraOffset.y) {
+                    this.cameraOffset.setY(gameObjects[i].position.y - this.cameraPadding)
                     cameraChanged = true;
-                } else if ((gameObjects[i].position.y + 1 + cameraPadding) > (this.cameraOffset.y + (this.canvas.height / this.unitSize))) {
-                    this.cameraOffset.setY(gameObjects[i].position.y - (this.canvas.height / this.unitSize) + 1 + cameraPadding);
+                } else if ((gameObjects[i].position.y + 1 + this.cameraPadding) > (this.cameraOffset.y + (this.canvas.height / this.unitSize))) {
+                    this.cameraOffset.setY(gameObjects[i].position.y - (this.canvas.height / this.unitSize) + 1 + this.cameraPadding);
                     cameraChanged = true;
                 }
 
