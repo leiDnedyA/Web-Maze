@@ -1,6 +1,13 @@
 
+
 class CharController {
-    constructor() {
+/**
+ * 
+ * @param {Array<>} moveCancelers list of elements that, when selected, will result in input not being taken
+ */
+    constructor(moveCancelers) {
+
+        this.moveCancelers = moveCancelers;
 
         this.gameCanvas = document.querySelector("#gameCanvas");
 
@@ -15,6 +22,8 @@ class CharController {
         };
 
         this.start = this.start.bind(this);
+        this.stopMovement = this.stopMovement.bind(this);
+        this.checkMoveCanceler = this.checkMoveCanceler.bind(this);
         this.filterKey = this.filterKey.bind(this);
         this.handleKeydown = this.handleKeydown.bind(this);
         this.handleKeyup = this.handleKeyup.bind(this);
@@ -26,11 +35,30 @@ class CharController {
 
         window.addEventListener('click', (e)=>{
             //checks if player has gameCanvas selected
-            this.canvasSelected = (this.gameCanvas == e.target);
+            this.checkMoveCanceler(e);
         })
+
+        window.addEventListener('submit', (e)=>{
+            this.checkMoveCanceler(e);
+        });
 
         window.addEventListener('keydown', this.handleKeydown);
         window.addEventListener('keyup', this.handleKeyup)
+    }
+
+    stopMovement(){
+        this.canvasSelected = false;
+    }
+
+    checkMoveCanceler(e){
+        console.log(e.target);
+
+        this.canvasSelected = true;
+        for (let i in this.moveCancelers) {
+            if (e.target === this.moveCancelers[i]) {
+                this.canvasSelected = false;
+            }
+        }
     }
 
     filterKey(key){

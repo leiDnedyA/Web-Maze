@@ -39,6 +39,11 @@ table{
     color: #444;
 }
 
+.subtext{
+    color: gray;
+    font-size: 80%;
+}
+
 .overlay {
     /* Used to put a transparent layer of color over screen */
     position: fixed;
@@ -97,6 +102,17 @@ table{
     color: #666;
     margin: 3px;
     display: none;
+}
+
+#displayMessage {
+    border: 1px solid black;
+    padding: 5px;
+    text-align: center;
+    white-space:pre-wrap;
+    left: 40%;
+    top: 50%;
+    background-color: white;
+    position: fixed;
 }
 
 #battleRequestNotification {

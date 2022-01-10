@@ -30,7 +30,7 @@ const updateFunc = (deltaTime) => {
 const engine = new Engine(60, updateFunc);
 const renderer = new Renderer(gameCanvas);
 const world = new World();
-const charController = new CharController();
+const charController = new CharController([chatBoxDiv, chatInput, chatForm]);
 
 //view controllers
 const canvasController = new CanvasController(gameCanvas, renderer.unitSize);
@@ -38,6 +38,7 @@ const battleRequestHandler = new BattleRequestHandler(socket);
 const chatBox = new ChatBox(chatBoxDiv);
 const chat = new Chat(socket, chatBox, chatForm, chatInput);
 const minigameController = new MinigameController(socket, chatBox);
+const displayMessageHandler = new DisplayMessageHandler(charController.stopMovement);
 
 const contextMenuOptions = {
     "wave": {
@@ -139,6 +140,11 @@ loginForm.addEventListener('submit', (e) => {
     socket.on("roomUpdate", (data) => {
         roomLabel.innerHTML = `Current room: ${data.name}`;
         renderer.setTileMap(data.tileMap);
+    })
+    socket.on('displayText', (data)=>{
+        console.log(data.text);
+        chatBox.addMessage(`<em>${data.text}</em>`);
+        displayMessageHandler.newMessage(data.text);
     })
     socket.on('assets', (data) => {
         renderer.setTileSheetSRC(data.tileSheetURL);

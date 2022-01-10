@@ -7,7 +7,7 @@ const BattleRequestHandler = require('./battles/battle_request_handler.js');
 const MinigameHandler = require('./battles/minigames/minigame_handler.js');
 
 class World {
-    constructor(name = 'Sample World', maxPlayers = 20, tickSpeed = 30, worldData) {
+    constructor(name = 'Sample World', maxPlayers = 20, tickSpeed = 30, worldData, startMessage = "Hello.") {
         this.name = name;
         this.maxPlayers = maxPlayers;
         this.tickSpeed = tickSpeed;
@@ -15,6 +15,8 @@ class World {
         this.clients = {};
         this.worldData = worldData;
         this.rooms = worldData.roomList;
+
+        this.startMessage = startMessage;
 
         this.actionsHandler = new ActionsHandler(this);
         this.physicsEngine = new PhysicsEngine(this.tickSpeed, this.rooms);
@@ -81,11 +83,15 @@ class World {
      * @param {string} room name of room 
      */
     addEntity(entity, room){
-        this.physicsEngine.addEntity(entity);
+        this.physicsEngine.addEntity(entity);        
         if(room){
             this.physicsEngine.entities[entity.id].setRoom(room, this.rooms[room].startPos);
         }else{
             this.physicsEngine.entities[entity.id].setRoom(this.worldData.startRoom);
+        }
+
+        if(this.clients.hasOwnProperty(entity.id)){
+            this.clients[entity.id].displayText(this.startMessage);
         }
     }
 

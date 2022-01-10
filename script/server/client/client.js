@@ -16,6 +16,8 @@ class Client {
 
         this.emit = this.emit.bind(this);
 
+        this.displayText = this.displayText.bind(this);
+
         this.init = this.init.bind(this);
         this.generatePlayer = this.generatePlayer.bind(this);
         this.disconnect = this.disconnect.bind(this);
@@ -70,6 +72,10 @@ class Client {
 
     setWorld(w){
         this.world = w;
+    }
+
+    displayText(text){
+        this.socket.emit('displayText', {text: text});
     }
 
     setRoom(roomName, data){

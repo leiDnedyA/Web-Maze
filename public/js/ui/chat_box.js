@@ -42,7 +42,7 @@ class ChatBox{
 
     start(){
         this.show();
-        this.addMessage(this.startMessage);
+        // this.addMessage(this.startMessage);
     }
 
     show(){

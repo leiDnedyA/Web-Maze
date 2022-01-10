@@ -123,7 +123,7 @@ const sendWave = (senderID, recieverID)=>{
 }
 
 //world setup
-const testWorld = new World('Labyrinth', 60, tickSpeed, sampleWorldData);
+const testWorld = new World('Labyrinth', 60, tickSpeed, sampleWorldData, `Welcome. Use WASD or ARROW keys to move arround and press SPACE to use ladders.`);
 worldList.push(testWorld);
 
 const world2 = new World('Test World', 10, tickSpeed, sampleWorldData);
