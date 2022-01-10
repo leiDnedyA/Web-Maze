@@ -100,7 +100,7 @@ const startGame = ()=>{
     chat.start();
     chatBox.start();
     battleRequestHandler.start();
-    controlsButton.style.visibility = 'visible';
+    // controlsButton.style.visibility = 'visible';
     controlsButton.addEventListener('click', ()=>{
         alert(helpMessage);
     })

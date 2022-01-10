@@ -57,7 +57,7 @@ class World {
                     return false;
                 })
                 .map((entity, index) => {
-                    return { id: entity.id, name: entity.name, isMoving: entity.isMoving, position: { x: entity.position.x, y: entity.position.y } }
+                    return { id: entity.id, name: entity.name, isMoving: entity.isMoving, position: { x: entity.position.x, y: entity.position.y }, velocity: {x: entity.velocity.x, y: entity.velocity.y}}
                 })
             for (let j in this.clients) {
                 if(this.clients[j].room == i){
