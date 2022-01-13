@@ -29,7 +29,7 @@ const xssFilter = /<(.*)>/;
 //change these for tests
 // const roomDimension = 40;
 const wallFrequency = .65; //.45 by default
-const randomRoomDimensions = [20, 20]; //[100, 100] by default
+const randomRoomDimensions = [15, 15]; //[100, 100] by default
 
 const usedDoorPositions = [];
 const randomDoorPos = (dimensions)=>{
