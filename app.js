@@ -27,8 +27,9 @@ const chatChatLimit = 240;
 const xssFilter = /<(.*)>/;
 
 //change these for tests
-const randomRoomDimensions = [100, 100]; //[100, 100] by default
-const wallFrequency = .45; //.45 by default
+// const roomDimension = 40;
+const wallFrequency = .6; //.45 by default
+const randomRoomDimensions = [30, 30]; //[100, 100] by default
 
 const usedDoorPositions = [];
 const randomDoorPos = (dimensions)=>{
@@ -40,9 +41,13 @@ const randomDoorPos = (dimensions)=>{
         for(let i in usedDoorPositions){
             if(usedDoorPositions[i][0] === pos[0] && usedDoorPositions[i][1] === pos[1]){
                 match = true;
+            }else{
+                match = false;
             }
         }
     }while(match)
+
+    usedDoorPositions.push(pos);
 
     return pos;
 }
