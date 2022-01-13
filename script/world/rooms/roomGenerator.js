@@ -13,6 +13,10 @@ const tsize = 16;
  */
 const coordsToIndex = (coords, dimensions)=>{
     
+    if(coords[0] >= dimensions[0] || coords[1] >= dimensions[1] || coords[0] < 0 || coords[1] < 0){
+        return null;
+    }
+
     return coords[1] * dimensions[1] + coords[0];
 }
 
@@ -73,80 +77,157 @@ const generateRoom = (name, width, height, startDoor, otherDoors, wallFrequency 
 
     // console.log(doorList)
 
-    //generates a noise map
-    let noiseMap = [];    
-    for(let i = 0; i < width * height; i++){
-        if (Math.random() >= wallFrequency){
-            noiseMap.push(0);
-        }else{
-            noiseMap.push(1);
-        }
-    }
-
-    // console.log(noiseMap)
-
-    //sets tile based on Moore Neighborhood
     let tileMap = [];
-    for(let i = 0; i < width; i++){
-        for(let j = 0; j < height; j++){
-            let w = countNeighborhoodWalls([i, j], noiseMap, width, height);
-            if(w > 4){
-                tileMap.push(tileDict.wall);
-            }else{
-                tileMap.push(tileDict.floor);
+
+    let generateTileMap = ()=>{
+
+        let tileMap = [];
+
+        //generates a noise map
+        let noiseMap = [];
+        for (let i = 0; i < width * height; i++) {
+            if (Math.random() >= wallFrequency) {
+                noiseMap.push(0);
+            } else {
+                noiseMap.push(1);
             }
         }
-    }
 
-    for(let i in tileMap){
-        if(tileMap[i] === tileDict.wall){
-            if(Math.random() < .1){
-                tileMap[i] = tileDict.specialWall;
-            }
-        }
-    }
-
-    for(let i in doorList){
-        if(doorList[i].hasOwnProperty(name)){
-            let coords = [doorList[i][name][0], doorList[i][name][1]];
-            let index = coordsToIndex(coords, [width, height]);
-
-            let maxDoorWallNeighbors = 4;
-
-            //check if door is too enclosed
-            let tries = 0;
-            let neighborWallCount = countNeighborhoodWalls(coords, tileMap, width, height, tileDict.wall);
-            while (neighborWallCount > maxDoorWallNeighbors && tries < 10){
-
-                let xRange = range(coords[0] - 1, coords[0] + 1);
-                let yRange = range(coords[1] - 1, coords[1] + 1);
-
-                for (let j in xRange) {
-                    for (let k in yRange) {
-                        let tempCoords = [xRange[j], yRange[k]];
-                        if (tempCoords[0] == coords[0] && tempCoords[1] == coords[1]) {
-
-                        } else {
-                            let tempIndex = coordsToIndex(tempCoords, [width, height]);
-                            if(tempIndex >= 0){
-                                if(tileMap[tempIndex] != tileDict.door){
-                                    tileMap[tempIndex] = tileDict.floor;
-                                }
-                            }
-                        }
-                    }
+        //sets tile based on Moore Neighborhood
+        for (let i = 0; i < width; i++) {
+            for (let j = 0; j < height; j++) {
+                let w = countNeighborhoodWalls([i, j], noiseMap, width, height);
+                if (w > 4) {
+                    tileMap.push(tileDict.wall);
+                } else {
+                    tileMap.push(tileDict.floor);
                 }
-
-                tries++;
-
             }
-            tileMap[coordsToIndex(coords, [width, height])] = tileDict.door;
         }
+
+        //adds random variation to walls
+        for (let i in tileMap) {
+            if (tileMap[i] === tileDict.wall) {
+                if (Math.random() < .1) {
+                    tileMap[i] = tileDict.specialWall;
+                }
+            }
+        }
+
+        return tileMap;
+
+    }
+
+    let addDoors = () => {
+        for (let i in doorList) {
+            if (doorList[i].hasOwnProperty(name)) {
+                let coords = [doorList[i][name][0], doorList[i][name][1]];
+                let index = coordsToIndex(coords, [width, height]);
+
+                tileMap[index] = tileDict.door;
+            }else{
+                console.log('the problem is in addDoors')
+            }
+        }
+        return tileMap;
+
+    }
+
+    let checkDoorsAccessible = (startPos, tileMap, doorList)=>{
+        
+        //flood fill algorithm
+        let array = [...tileMap]; //shallow copy of tileMap
+        let foundDoorCount = 0;
+
+        let acceptedVals = [tileDict.door, tileDict.floor];
+
+        //recursive depth-first search through tileMap
+        let dfs = (coords)=>{
+            let index = coordsToIndex(coords, [width, height]);
+            let val = array[index];
+            let accepted = false;
+            for(let i in acceptedVals){
+                if(val === acceptedVals[i]){
+                    accepted = true;
+                }
+            }
+
+            if(!accepted){
+                return;
+            }else{
+                if(val === tileDict.door){
+                    foundDoorCount++;
+                }
+                array[index] = -array[index];
+                dfs([coords[0], coords[1]-1]); //up
+                dfs([coords[0], coords[1]+1]); //down
+                dfs([coords[0]-1, coords[1]]); //left
+                dfs([coords[0]+1, coords[1]]); //right
+            }
+        }
+
+        dfs(startPos);
+
+        // console.log(foundDoorCount);
+
+        return [(foundDoorCount >= doorList.length), array];
+
+    }
+
+    
+
+    let searchStartPos = startDoor[name];
+
+    tileMap = generateTileMap(tileMap);
+    tileMap = addDoors(tileMap);
+
+    //logs the before and after of a continuityCheck instance
+    const logCheck = (lastContinuityCheck)=>{
+        console.log('before: ')
+        for (let i = 0; i < height; i++) {
+            let row = []
+            for (let j = 0; j < width; j++) {
+                row.push(tileMap[(i * width) + j]);
+            }
+            console.log(row);
+
+        }
+        let a = lastContinuityCheck[1];
+        console.log('-----')
+        for (let i = 0; i < height; i++) {
+            let row = []
+            for (let j = 0; j < width; j++) {
+                row.push(a[(i * width) + j]);
+            }
+            console.log(row);
+
+        }
+
+    }
+
+    let maxAttempts = 100000;
+    let attempts = 0;
+    let lastContinuityCheck = checkDoorsAccessible(searchStartPos, tileMap, doorList);
+
+    while ((!lastContinuityCheck[0]) && attempts < maxAttempts){
+        tileMap = generateTileMap(tileMap);
+        tileMap = addDoors(tileMap);
+        lastContinuityCheck = checkDoorsAccessible(searchStartPos, tileMap, doorList);
+        
+        // logCheck(lastContinuityCheck);
+        
+        attempts++;
     }
 
     let startDoorPos = [0, 0]
 
-    // console.log(doorList)
+
+    if(attempts === maxAttempts){
+        console.log(`Room ${name} has a door disconnection`)
+    }else{
+        // console.log(`Room ${name} was generated without error.`)
+    }
+
 
     return new Room(name, startDoorPos, { rows: width, cols: height, tsize: tsize, tiles: tileMap }, doorList);
 }
