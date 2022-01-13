@@ -91,7 +91,7 @@ const sampleWorldData = {
 }
 
 let randomRooms = [];
-let roomsToGenerate = 15;
+let roomsToGenerate = 100;
 
 let doorsPerRoom = 3; //gets multiplied by 2
 let doorList = [] //index is first entrance index
