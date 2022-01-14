@@ -30,6 +30,7 @@ const xssFilter = /<(.*)>/;
 // const roomDimension = 40;
 const wallFrequency = .65; //.45 by default
 const randomRoomDimensions = [15, 15]; //[100, 100] by default
+const roomsToGenerate = 50;
 
 const usedDoorPositions = [];
 const randomDoorPos = (dimensions)=>{
@@ -56,6 +57,9 @@ const lobbyStartDoor = {
     'lobby': [2, 4],
     'level0': randomDoorPos(randomRoomDimensions)
 }
+
+const finalDoorPos = randomDoorPos(randomRoomDimensions);
+const finalLevelName = `level${roomsToGenerate - 1}`
 
 const sampleWorldData = {
     startRoom: "lobby",
@@ -86,14 +90,46 @@ const sampleWorldData = {
             ],
             dimensions: [5,  5]
         },
+        'finish': {
+            name: 'finish',
+            startPos: { x: 2, y: 3 },
+            message: `Congradulations, you made it through all ${roomsToGenerate} rooms! Take the door below to return to the lobby.`,
+            tileMap: {
+                cols: 5,
+                rows: 5,
+                tsize: 16,
+                tiles: [
+                    2, 2, 2, 2, 2,
+                    2, 2, 2, 2, 2,
+                    2, 2, 5, 2, 2,
+                    2, 2, 2, 2, 2,
+                    2, 2, 5, 2, 2,
+                ]
+            },
+            doors: [
+                //note: add door from last level to finish room here
+                {'finish': [2, 4], 'lobby': [2, 4]},
+            ],
+            bounds: [
+                [0, 0],
+                [4, 0],
+                [4, 4],
+                [0, 4]
+            ],
+            dimensions: [5, 5]
+        },
         // 'outdoors': generateRoom('outdoors', 100, 100, 'lobby')
     }
 }
 
-let randomRooms = [];
-let roomsToGenerate = 100;
+const endDoor = {};
+endDoor[finalLevelName] = finalDoorPos;
+endDoor.finish = [2, 2];
+sampleWorldData.roomList.finish.doors.push(endDoor);
 
-let doorsPerRoom = 3; //gets multiplied by 2
+let randomRooms = [];
+
+let doorsPerRoom = 4; //gets multiplied by 2
 let doorList = [] //index is first entrance index
 
 
@@ -106,7 +142,7 @@ for(let i = 0; i < roomsToGenerate; i++){
     if(i !== roomsToGenerate - 1){
         nextDoor[`level${i + 1}`] = randomDoorPos(randomRoomDimensions);
     }else{
-        nextDoor[`lobby`] = [11, 23];
+        nextDoor = endDoor;
     }
     
     doorList.push(nextDoor);

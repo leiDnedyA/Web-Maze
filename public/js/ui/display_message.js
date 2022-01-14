@@ -45,7 +45,6 @@ class DisplayMessageHandler{
     newMessage(text){
 
         this.displayCallback();
-
         this.visible = true;
         this.textElement.innerHTML = text;
         this.overlay.style.display = 'block';

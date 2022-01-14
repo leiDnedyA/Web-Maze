@@ -14,6 +14,8 @@ const controlsButton = document.querySelector("#controlsButton");
 
 loadingText.innerHTML = "loading...";
 const helpMessage = 'CONTROLS: WASD or ARROW KEYS to move, SPACE to enter a door, CLICK on players to interact.\n Make sure that the GAME WINDOW is selected to move around.';
+const backgroundColor = '#000210';
+
 
 var worldTableElement = null;
 var clientID = null;
@@ -138,10 +140,11 @@ loginForm.addEventListener('submit', (e) => {
         minigameController.init(clientID);
     })
     socket.on("roomUpdate", (data) => {
-        roomLabel.innerHTML = `Current room: ${data.name}`;
+        roomLabel.innerHTML = `Current room: <strong>${data.name}</strong>`;
         renderer.setTileMap(data.tileMap);
     })
     socket.on('displayText', (data)=>{
+        charController.reset();
         console.log(data.text);
         chatBox.addMessage(`<em>${data.text}</em>`);
         displayMessageHandler.newMessage(data.text);

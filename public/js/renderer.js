@@ -1,8 +1,7 @@
 
 const motionBlur = 1; //number between 0 and 1
 const textMargin = 3;
-const backgroundColor = '#000210';
-const textColor = '#db2e2e';
+const textColor = '#fff';
 
 const playerTiles = {
     'static': 0,
@@ -87,13 +86,16 @@ class Renderer {
         this.renderChats(chats, gameObjects);
     }
 
-    handleResize(){
+    handleResize() {
         this.canvas.width = window.innerWidth;
         this.canvas.height = window.innerHeight * .75;
 
         this.unitSize = 30;
-        this.textSize = this.unitSize * 25/30;
-        
+        this.textSize = this.unitSize * 22 / 30;
+
+        this.font = `${this.textSize}px monospace`;
+        this.boldFont = `bold ${this.textSize}px monospace`;
+
         let minDimension = (this.canvas.width > this.canvas.height) ? this.canvas.height : this.canvas.width;
 
         this.cameraPadding = 10 / 1080 * minDimension;
@@ -105,9 +107,9 @@ class Renderer {
         this.ctx.msImageSmoothingEnabled = false;
         this.ctx.imageSmoothingEnabled = false;
 
-        if(!this.windowStarted){
+        if (!this.windowStarted) {
             this.windowStarted = true;
-        }else{
+        } else {
             this.adjustTileMap();
         }
 
@@ -120,7 +122,7 @@ class Renderer {
         //     for (let j = 0; j < this.tileMap.cols; j++) {
 
         //         let adjPos = this.relativePos(new Vector2(j, i));
-                
+
         //         let sheetPos = this.tileMap.getTile(i, j);
         //         this.ctx.drawImage(this.tileMap.tileSheet, sheetPos.x, sheetPos.y, sheetPos.height, sheetPos.width, adjPos.x * this.unitSize, adjPos.y * this.unitSize, this.unitSize, this.unitSize);
         //     }
@@ -131,11 +133,11 @@ class Renderer {
         let offset = [this.cameraOffset.x - Math.floor(this.cameraOffset.x), this.cameraOffset.y - Math.floor(this.cameraOffset.y)];
 
         //optimized rendering
-        for (let i = 0; i < testMap.cols; i++){
-            for(let j = 0; j < testMap.rows; j++){
+        for (let i = 0; i < testMap.cols; i++) {
+            for (let j = 0; j < testMap.rows; j++) {
                 let t = testMap.tiles[i * (testMap.rows) + j];
                 let args = [(i - offset[0]) * this.unitSize, (j - offset[1]) * this.unitSize, this.unitSize, this.unitSize];
-                if(t == -1){
+                if (t == -1) {
                     this.ctx.fillStyle = backgroundColor;
                     // this.ctx.fillRect(...args);
 
@@ -154,47 +156,47 @@ class Renderer {
             this.ctx.fillStyle = 'red';
 
 
-            if(this.checkWorldPosOnscreen(gameObjects[i].position)){
+            if (this.checkWorldPosOnscreen(gameObjects[i].position)) {
                 let adjPos = this.relativePos(gameObjects[i].position);
                 let sheetPos;
                 let minPlayerSpeed = .01;
-                let speed = { x: Math.abs(gameObjects[i].velocity.x), y: Math.abs(gameObjects[i].velocity.y)}
+                let speed = { x: Math.abs(gameObjects[i].velocity.x), y: Math.abs(gameObjects[i].velocity.y) }
 
-                if (gameObjects[i].isMoving && (speed.x > minPlayerSpeed || speed.y > minPlayerSpeed)){
-                    
+                if (gameObjects[i].isMoving && (speed.x > minPlayerSpeed || speed.y > minPlayerSpeed)) {
+
                     let a = animationObjects[gameObjects[i].id];
 
                     let maxV = ((speed.x > speed.y) ? speed.x : speed.y);
 
                     a.tAccumulator += maxV / 4;
-                    if(a.tAccumulator >= 5){
+                    if (a.tAccumulator >= 5) {
                         a.tAccumulator = 0;
-                        if(a.frame === 0){
+                        if (a.frame === 0) {
                             a.frame = 1;
-                        }else{
+                        } else {
                             a.frame = 0;
                         }
                     }
                     sheetPos = this.tileMap.getTileFromSheet(playerTiles[a.frame]);
-                }else{
+                } else {
                     sheetPos = this.tileMap.getTileFromSheet(playerTiles.static);
                 }
 
                 this.ctx.drawImage(this.tileMap.tileSheet, sheetPos.x, sheetPos.y, sheetPos.height, sheetPos.width, adjPos.x * this.unitSize, adjPos.y * this.unitSize, this.unitSize, this.unitSize);
-                
+
                 // this.ctx.fillRect(adjPos.x * this.unitSize, adjPos.y * this.unitSize, this.unitSize, this.unitSize);
                 this.renderNametag(gameObjects[i]);
             }
 
-            
 
-            
+
+
         }
     }
 
     renderNametag(gameObject) {
-        this.ctx.font = `${this.textSize}px sans`;
-        this.ctx.fillStyle = 'white';
+        this.ctx.font = this.font;
+        this.ctx.fillStyle = textColor;
 
         let textWidth = this.ctx.measureText(gameObject.name).width;
         let parentAdjPos = this.relativePos(gameObject.position);
@@ -202,14 +204,14 @@ class Renderer {
         this.ctx.fillText(gameObject.name, parentAdjPos.x * this.unitSize - (textWidth / 2) + this.unitSize / 2, parentAdjPos.y * this.unitSize - textMargin);
     }
 
-    renderChats(chats, gameObjects){
+    renderChats(chats, gameObjects) {
 
-        for(let i in chats){
-            for(let j in gameObjects){
-                if(gameObjects[j].id == chats[i].senderID){
-                    if(this.checkWorldPosOnscreen(gameObjects[j].position)){
+        for (let i in chats) {
+            for (let j in gameObjects) {
+                if (gameObjects[j].id == chats[i].senderID) {
+                    if (this.checkWorldPosOnscreen(gameObjects[j].position)) {
                         let adjPos = this.relativePos(gameObjects[j].position);
-                        this.ctx.fillStyle = 'white';
+                        this.ctx.fillStyle = textColor;
 
                         this.ctx.fillText(chats[i].message, adjPos.x * this.unitSize, (adjPos.y - 1) * this.unitSize);
                     }
@@ -228,11 +230,11 @@ class Renderer {
      * Adjusts the cropped version of this.tileMap and stores it in this.adjustedTileMap
      * to optimize rendering.
      */
-    adjustTileMap(){ //should be called every time camera is adjusted
+    adjustTileMap() { //should be called every time camera is adjusted
 
-        let getIndexFromCoords = (coords, dimensions)=>{
-            for(let i in coords){
-                if(coords[i] < 0 || coords[i] >= dimensions[i]){
+        let getIndexFromCoords = (coords, dimensions) => {
+            for (let i in coords) {
+                if (coords[i] < 0 || coords[i] >= dimensions[i]) {
                     return null;
                 }
             }
@@ -245,22 +247,22 @@ class Renderer {
 
         // console.log(dimensions);
 
-        
+
         let adjTiles = [];
 
         // console.log(offset);
-        for(let i = 0; i < dimensions[0]; i++){
-            for(let j = 0; j < dimensions[1]; j++){
+        for (let i = 0; i < dimensions[0]; i++) {
+            for (let j = 0; j < dimensions[1]; j++) {
                 let index = getIndexFromCoords([i + offset[0], j + offset[1]], [this.tileMap.cols, this.tileMap.rows]);
                 let t = this.tileMap.tiles[index];
-                if(index !== NaN && t){
+                if (index !== NaN && t) {
                     adjTiles.push(t);
-                }else{
+                } else {
                     adjTiles.push(-1);
-                }     
+                }
             }
         }
-        
+
         let map = {
             cols: dimensions[0],
             rows: dimensions[1],
@@ -300,7 +302,7 @@ class Renderer {
 
 
             }
-            if(cameraChanged){
+            if (cameraChanged) {
                 this.adjustTileMap();
             }
         }
@@ -312,13 +314,13 @@ class Renderer {
      * @param {Vector2} pos worldPos
      * @returns {boolean} true --> visible on screen, false --> not visible on screen
      */
-    checkWorldPosOnscreen(pos){
+    checkWorldPosOnscreen(pos) {
 
         let adjPos = this.relativePos(pos);
         adjPos.setX(adjPos.x * this.unitSize);
         adjPos.setY(adjPos.y * this.unitSize);
 
-        if(adjPos.x < 0 || adjPos.x > this.canvas.width || adjPos.y < 0 || adjPos.y > this.canvas.height){
+        if (adjPos.x < 0 || adjPos.x > this.canvas.width || adjPos.y < 0 || adjPos.y > this.canvas.height) {
             return false;
         }
         return true;

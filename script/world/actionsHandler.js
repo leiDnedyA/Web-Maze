@@ -30,6 +30,7 @@ class ActionsHandler{
                         //door[key] = [x, y] of door's entrance in room "key"
 
                         if(door){
+                            console.log(door);
                             if(door.hasOwnProperty(room.name)){
                                 let entrances = Object.keys(door);
                                 let destination = '';
@@ -38,9 +39,12 @@ class ActionsHandler{
                                         destination = entrances[j];
                                     }
                                 }
+                                
+                                
 
                                 if (Math.abs(player.position.x - (door[room.name][0])) < 1 && Math.abs(player.position.y - (door[room.name][1])) < 1) {
-                                    this.world.changeClientRoom(clientList[i], destination, door[destination]);
+                                    let exitPos = (door[destination] === []) ? [worldData.roomList[destination].startPos.x, worldData.roomList[destination].startPos.y] : door[destination];
+                                    this.world.changeClientRoom(clientList[i], destination, exitPos);
                                 }
                             }
                         }

@@ -111,6 +111,9 @@ class World {
     }
 
     changeClientRoom(client, roomName, startCoords){
+        if(this.worldData.roomList[roomName].hasOwnProperty('message')){
+            client.displayText(this.worldData.roomList[roomName].message);
+        }
         client.setRoom(roomName, this.worldData.roomList[roomName]);
         this.physicsEngine.entities[client.id].setRoom(roomName, { x: startCoords[0], y: startCoords[1]});
     }

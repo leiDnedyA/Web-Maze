@@ -22,6 +22,7 @@ class CharController {
         };
 
         this.start = this.start.bind(this);
+        this.reset = this.reset.bind(this);
         this.stopMovement = this.stopMovement.bind(this);
         this.checkMoveCanceler = this.checkMoveCanceler.bind(this);
         this.filterKey = this.filterKey.bind(this);
@@ -48,6 +49,16 @@ class CharController {
 
     stopMovement(){
         this.canvasSelected = false;
+    }
+
+    reset(){
+        this.keysDown = {
+            'w': false,
+            'a': false,
+            's': false,
+            'd': false,
+            ' ': false
+        };
     }
 
     checkMoveCanceler(e){
