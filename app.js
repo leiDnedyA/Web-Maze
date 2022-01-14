@@ -27,9 +27,9 @@ const chatChatLimit = 240;
 const xssFilter = /<(.*)>/;
 
 //change these for tests
-// const roomDimension = 40;
-const wallFrequency = .65; //.45 by default
-const randomRoomDimensions = [15, 15]; //[100, 100] by default
+const roomDimension = 100;
+const wallFrequency = .5; //.45 by default
+const randomRoomDimensions = [roomDimension, roomDimension]; //[100, 100] by default
 const roomsToGenerate = 50;
 
 const usedDoorPositions = [];
