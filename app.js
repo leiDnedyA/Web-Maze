@@ -28,7 +28,7 @@ const xssFilter = /<(.*)>/;
 
 //change these for tests
 const roomDimension = 100;
-const wallFrequency = .5; //.45 by default
+const wallFrequency = .55; //.45 by default
 const randomRoomDimensions = [roomDimension, roomDimension]; //[100, 100] by default
 const roomsToGenerate = 50;
 
