@@ -1,3 +1,5 @@
-This is a full-fledged MMO to be made with a Node.js backend and a vanilla JavaScript frontend(possibly with libraries down the line). Come play at the Heroku Link below!
+This is a multiplayer maze game written in JavaScript. 
+Includes procedural level generation, user interactions, and chat functionality!
+All original art.
 
 HEROKU LINK: https://ayden-game.herokuapp.com/
